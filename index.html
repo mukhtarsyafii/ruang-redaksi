@@ -3,11 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ruang Redaksi — Kelas A, Radio Komunitas Warga</title>
+<title>Ruang Redaksi</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&display=swap">
 <style>
-  /* Design tokens: stand-in for the app theme vars so the page works standalone. */
   :root {
     --foreground: #1a1917;
     --muted-foreground: #7a776e;
@@ -16,16 +15,29 @@
     --border: #e2dfd7;
     --accent: #c0392b;
   }
+  :root.dark {
+    --foreground: #f0ede8;
+    --muted-foreground: #a09d97;
+    --background: #141412;
+    --card: #1e1c1a;
+    --border: #2e2c29;
+    --accent: #e74c3c;
+    color-scheme: dark;
+  }
   body { font-family: 'Inter', system-ui, sans-serif; background: var(--background); }
   .logo-font { font-family: 'Instrument Serif', serif; }
   .badge { display:inline-block;padding:2px 8px;border-radius:11px;font-size:11px;font-weight:600;white-space:nowrap; }
   .rubrik-tag { display:inline-block;margin-top:2px;font-size:10px;padding:1px 5px;border-radius:9px; }
   table { border-collapse: collapse; width: 100%; font-size: 12px; }
-  thead th { text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap; }
+  thead th { text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;user-select:none; }
   tbody tr { transition: background .1s; }
+  .toast{position:fixed;bottom:16px;right:16px;background:var(--foreground);color:var(--card);padding:9px 16px;border-radius:8px;font-size:13px;font-weight:500;z-index:400;opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s;pointer-events:none;}
+  .toast.show{opacity:1;transform:translateY(0);}
 </style>
 </head>
 <body class="text-[var(--foreground)] antialiased p-0">
+
+<div class="toast" id="toast"></div>
 
 <!-- Registrasi gate -->
 <div id="gate" class="hidden fixed inset-0 z-[100] bg-[var(--background)] items-center justify-center p-4">
@@ -34,7 +46,7 @@
     <h1 class="logo-font text-2xl mt-3 mb-1">Pilih Kelas Anda</h1>
     <p class="text-xs text-[var(--muted-foreground)] mb-4">Masukkan nama mahasiswa, lalu pilih kelas tempat Anda bertugas.</p>
     <label class="block mb-4"><span class="block text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-1">Nama Mahasiswa</span>
-      <input name="nama" required placeholder="Nama kamu" class="w-full bg-[var(--background)] border border-[var(--border)] rounded-md py-2 px-2.5 text-sm"></label>
+      <input name="nama" required placeholder="Nama kamu" class="w-full bg-[var(--background)] border border-[var(--border)] rounded-md py-2 px-2.5 text-sm text-[var(--foreground)]"></label>
     <div class="grid grid-cols-2 gap-3">
       <button type="submit" data-kelas="A" class="text-left bg-[var(--background)] border border-[var(--border)] rounded-xl p-3 cursor-pointer hover:border-[#3b82f6]"><span class="block w-7 h-7 rounded-full bg-[#3b82f6]/15 text-[#3b82f6] text-center leading-7 mb-2 text-sm">🖥</span><span class="block text-xs font-semibold">KELAS A</span><span class="block text-[11px] text-[var(--muted-foreground)]">Komunitas Mushalla</span></button>
       <button type="submit" data-kelas="B" class="text-left bg-[var(--background)] border border-[var(--border)] rounded-xl p-3 cursor-pointer hover:border-[#10b981]"><span class="block w-7 h-7 rounded-full bg-[#10b981]/15 text-[#10b981] text-center leading-7 mb-2 text-sm">🖥</span><span class="block text-xs font-semibold">KELAS B</span><span class="block text-[11px] text-[var(--muted-foreground)]">Layarlembar</span></button>
@@ -46,15 +58,14 @@
 </div>
 
 <!-- Header -->
-<div class="rounded-t-xl overflow-hidden">
-  <div class="bg-[#1a1917] text-[#f8f7f4] px-4 py-2.5 flex items-center gap-2.5">
+<div class="overflow-hidden">
+  <div class="bg-[#1a1917] text-[#f8f7f4] px-4 py-2.5 flex items-center gap-2.5 flex-wrap">
     <div class="logo-font text-lg tracking-tight">Ruang<em class="text-[#c0392b] italic">Redaksi</em></div>
     <div id="kelas-select" class="bg-white/10 border border-white/[.18] rounded-md text-[#f8f7f4] text-xs font-medium py-1 px-2.5"></div>
     <div class="flex-1"></div>
-    <span class="text-sm opacity-70 cursor-pointer">🌓</span>
+    <button id="theme-btn" title="Ganti tema" class="text-sm opacity-70 cursor-pointer hover:opacity-100 transition-opacity">🌓</button>
     <button id="logout" title="Ganti kelas" class="bg-white/10 border border-white/[.18] rounded-md text-[#f8f7f4] text-xs font-medium py-1 px-2 cursor-pointer">↩</button>
-    <button class="bg-white/10 border border-white/[.18] rounded-md text-[#f8f7f4] text-xs font-medium py-1 px-2 cursor-pointer">👤</button>
-    <button class="bg-white/10 border border-white/[.18] rounded-md text-[#f8f7f4] text-xs font-medium py-1 px-2 cursor-pointer">📥 Ekspor</button>
+    <button id="export-btn" class="bg-white/10 border border-white/[.18] rounded-md text-[#f8f7f4] text-xs font-medium py-1 px-2 cursor-pointer">📥 Ekspor</button>
     <div class="relative"><button id="kelas-btn" class="bg-white/10 border border-white/[.18] rounded-md text-[#f8f7f4] text-xs font-medium py-1 px-2 cursor-pointer">⚙ Kelas</button><div id="kelas-menu" class="hidden absolute right-0 top-full mt-1 w-56 bg-[var(--card)] text-[var(--foreground)] border border-[var(--border)] rounded-lg shadow-xl py-1 z-50"></div></div>
     <button data-open-modal class="bg-[#c0392b] text-white rounded-md text-xs font-medium py-1 px-2 cursor-pointer">+ Tambah</button>
   </div>
@@ -63,54 +74,27 @@
   <div id="kelas-tabs" class="flex items-center gap-1 border-b border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-[var(--foreground)]"></div>
 
   <!-- Stats Bar -->
-  <div id="stats-bar" class="flex border-b border-[var(--border)] bg-[var(--card)] overflow-x-auto text-[var(--foreground)]">
-    <div class="py-2 px-4 border-r border-[var(--border)] cursor-pointer bg-[var(--card)] shadow-[inset_0_-2px_0_#c0392b]">
-      <div class="text-lg font-semibold leading-none tabular-nums">8</div>
-      <div class="text-[10px] text-[var(--muted-foreground)] mt-0.5 uppercase tracking-wider">Semua</div>
-    </div>
-    <div class="py-2 px-4 border-r border-[var(--border)] cursor-pointer hover:bg-[var(--background)]">
-      <div class="text-lg font-semibold leading-none tabular-nums">2</div>
-      <div class="text-[10px] text-[var(--muted-foreground)] mt-0.5 uppercase tracking-wider">Pitching</div>
-    </div>
-    <div class="py-2 px-4 border-r border-[var(--border)] cursor-pointer hover:bg-[var(--background)]">
-      <div class="text-lg font-semibold leading-none tabular-nums">2</div>
-      <div class="text-[10px] text-[var(--muted-foreground)] mt-0.5 uppercase tracking-wider">Produksi</div>
-    </div>
-    <div class="py-2 px-4 border-r border-[var(--border)] cursor-pointer hover:bg-[var(--background)]">
-      <div class="text-lg font-semibold leading-none tabular-nums">1</div>
-      <div class="text-[10px] text-[var(--muted-foreground)] mt-0.5 uppercase tracking-wider">Editing</div>
-    </div>
-    <div class="py-2 px-4 border-r border-[var(--border)] cursor-pointer hover:bg-[var(--background)]">
-      <div class="text-lg font-semibold leading-none tabular-nums">1</div>
-      <div class="text-[10px] text-[var(--muted-foreground)] mt-0.5 uppercase tracking-wider">Siap Tayang</div>
-    </div>
-    <div class="py-2 px-4 border-r border-[var(--border)] cursor-pointer hover:bg-[var(--background)]">
-      <div class="text-lg font-semibold leading-none tabular-nums">1</div>
-      <div class="text-[10px] text-[var(--muted-foreground)] mt-0.5 uppercase tracking-wider">Tayang</div>
-    </div>
-    <div class="py-2 px-4 cursor-pointer hover:bg-[var(--background)]">
-      <div class="text-lg font-semibold leading-none tabular-nums">1</div>
-      <div class="text-[10px] text-[var(--muted-foreground)] mt-0.5 uppercase tracking-wider">Ditunda</div>
-    </div>
-  </div>
+  <div id="stats-bar" class="flex border-b border-[var(--border)] bg-[var(--card)] overflow-x-auto text-[var(--foreground)]"></div>
 
   <!-- Toolbar -->
-  <div class="bg-[var(--card)] border-b border-[var(--border)] px-4 py-1.5 flex gap-2 items-center">
-    <input type="text" placeholder="Cari judul atau PIC…" class="bg-[var(--background)] text-[var(--foreground)] border border-[var(--border)] rounded-md py-1 px-2 text-xs flex-1 max-w-[200px]">
-    <select class="bg-[var(--background)] text-[var(--foreground)] border border-[var(--border)] rounded-md py-1 px-2 text-xs">
-      <option>Semua Status</option>
+  <div class="bg-[var(--card)] border-b border-[var(--border)] px-4 py-1.5 flex gap-2 items-center flex-wrap">
+    <input type="text" id="search-input" placeholder="Cari judul atau PIC…" class="bg-[var(--background)] text-[var(--foreground)] border border-[var(--border)] rounded-md py-1 px-2 text-xs flex-1 max-w-[200px]">
+    <select id="filter-status" class="bg-[var(--background)] text-[var(--foreground)] border border-[var(--border)] rounded-md py-1 px-2 text-xs">
+      <option value="">Semua Status</option>
+      <option>Pitching</option><option>Produksi</option><option>Editing</option>
+      <option>Siap Tayang</option><option>Tayang</option><option>Ditunda</option>
     </select>
-    <select class="bg-[var(--background)] text-[var(--foreground)] border border-[var(--border)] rounded-md py-1 px-2 text-xs">
-      <option>Semua Rubrik</option>
+    <select id="filter-rubrik" class="bg-[var(--background)] text-[var(--foreground)] border border-[var(--border)] rounded-md py-1 px-2 text-xs">
+      <option value="">Semua Rubrik</option>
     </select>
   </div>
 
   <!-- Table -->
-  <div class="overflow-x-auto border border-t-0 border-[var(--border)] rounded-b-xl bg-[var(--card)]">
-    <table class="text-[var(--foreground)]">
+  <div class="overflow-x-auto border border-t-0 border-[var(--border)] bg-[var(--card)]">
+    <table class="text-[var(--foreground)]" style="min-width:960px">
       <thead>
         <tr class="border-b-2 border-[var(--border)]">
-          <th class="px-2.5 py-2 text-[var(--muted-foreground)]">#</th>
+          <th class="px-2.5 py-2 text-[var(--muted-foreground)]" style="width:32px">#</th>
           <th class="px-2.5 py-2 text-[var(--muted-foreground)]">Judul / Topik</th>
           <th class="px-2.5 py-2 text-[var(--muted-foreground)]">Format</th>
           <th class="px-2.5 py-2 text-[var(--muted-foreground)]">PIC</th>
@@ -121,148 +105,68 @@
           <th class="px-2.5 py-2 text-[var(--muted-foreground)]">Approval</th>
           <th class="px-2.5 py-2 text-[var(--muted-foreground)]">Catatan Revisi</th>
           <th class="px-2.5 py-2 text-[var(--muted-foreground)]">Draft</th>
-          <th class="px-2.5 py-2 text-[var(--muted-foreground)] text-right">Aksi</th>
+          <th class="px-2.5 py-2 text-[var(--muted-foreground)] text-right" style="width:80px">Aksi</th>
         </tr>
       </thead>
-      <tbody>
-        <tr data-kelas="A" class="border-b border-[var(--border)] hover:bg-[var(--background)]">
-          <td class="px-2.5 py-2 text-[var(--muted-foreground)]">1</td>
-          <td class="px-2.5 py-2"><span class="font-medium block">Warga Terdampak Banjir di Kelurahan Sukamaju</span><span class="rubrik-tag bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)]">Berita Warga</span></td>
-          <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">Teks / Artikel</td>
-          <td class="px-2.5 py-2 font-medium">Andi Pratama</td>
-          <td class="px-2.5 py-2 text-[#c0392b] font-semibold text-[11px]">15 Okt ⚠</td>
-          <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">—</td>
-          <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">—</td>
-          <td class="px-2.5 py-2"><span class="badge" style="background:#eef2ff;color:#4338ca">Pitching</span></td>
-          <td class="px-2.5 py-2"><span class="badge" style="background:#f3f4f6;color:#6b7280">Belum</span></td>
-          <td class="px-2.5 py-2 text-[11px] text-[var(--muted-foreground)]">—</td>
-          <td class="px-2.5 py-2 text-[var(--muted-foreground)]">—</td>
-          <td class="px-2.5 py-2 text-right"><button class="bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)] rounded-md text-[11px] font-medium py-0.5 px-2 mr-1">Edit</button><span class="text-[var(--muted-foreground)] cursor-pointer hover:text-[#c0392b]">✕</span></td>
-        </tr>
-        <tr data-kelas="A" class="border-b border-[var(--border)] hover:bg-[var(--background)]">
-          <td class="px-2.5 py-2 text-[var(--muted-foreground)]">2</td>
-          <td class="px-2.5 py-2"><span class="font-medium block">Profil Pak Haji Ahmad — Tokoh Literasi Desa</span><span class="rubrik-tag bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)]">Profil Tokoh</span></td>
-          <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">Video</td>
-          <td class="px-2.5 py-2 font-medium">Siti Nurhaliza</td>
-          <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">20 Okt</td>
-          <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">24 Okt</td>
-          <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">28 Okt</td>
-          <td class="px-2.5 py-2"><span class="badge" style="background:#fef3c7;color:#92400e">Produksi</span></td>
-          <td class="px-2.5 py-2"><span class="badge" style="background:#f3f4f6;color:#6b7280">Belum</span></td>
-          <td class="px-2.5 py-2 text-[11px] text-[var(--muted-foreground)]">Rekaman audio perlu diulang</td>
-          <td class="px-2.5 py-2"><a href="#" class="text-[#c0392b] text-[11px] no-underline hover:underline">↗ Buka</a></td>
-          <td class="px-2.5 py-2 text-right"><button class="bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)] rounded-md text-[11px] font-medium py-0.5 px-2 mr-1">Edit</button><span class="text-[var(--muted-foreground)] cursor-pointer hover:text-[#c0392b]">✕</span></td>
-        </tr>
-        <tr data-kelas="B" class="border-b border-[var(--border)] hover:bg-[var(--background)]">
-          <td class="px-2.5 py-2 text-[var(--muted-foreground)]">3</td>
-          <td class="px-2.5 py-2"><span class="font-medium block">Festival Budaya Betawi 2026</span><span class="rubrik-tag bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)]">Budaya Lokal</span></td>
-          <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">Foto + Caption</td>
-          <td class="px-2.5 py-2 font-medium">Budi Setiawan</td>
-          <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">22 Okt</td>
-          <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">25 Okt</td>
-          <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">29 Okt</td>
-          <td class="px-2.5 py-2"><span class="badge" style="background:#dbeafe;color:#1e40af">Editing</span></td>
-          <td class="px-2.5 py-2"><span class="badge" style="background:#fef3c7;color:#92400e">Perlu Revisi</span></td>
-          <td class="px-2.5 py-2 text-[11px] text-[var(--muted-foreground)]">Caption perlu nama narasumber</td>
-          <td class="px-2.5 py-2"><a href="#" class="text-[#c0392b] text-[11px] no-underline hover:underline">↗ Buka</a></td>
-          <td class="px-2.5 py-2 text-right"><button class="bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)] rounded-md text-[11px] font-medium py-0.5 px-2 mr-1">Edit</button><span class="text-[var(--muted-foreground)] cursor-pointer hover:text-[#c0392b]">✕</span></td>
-        </tr>
-        <tr data-kelas="B" class="border-b border-[var(--border)] hover:bg-[var(--background)]">
-          <td class="px-2.5 py-2 text-[var(--muted-foreground)]">4</td>
-          <td class="px-2.5 py-2"><span class="font-medium block">Opini: Pentingnya Ruang Publik untuk Anak Muda</span><span class="rubrik-tag bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)]">Opini</span></td>
-          <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">Teks / Artikel</td>
-          <td class="px-2.5 py-2 font-medium">Dewi Anggraini</td>
-          <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">25 Okt</td>
-          <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">26 Okt</td>
-          <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">30 Okt</td>
-          <td class="px-2.5 py-2"><span class="badge" style="background:#d1fae5;color:#065f46">Siap Tayang</span></td>
-          <td class="px-2.5 py-2"><span class="badge" style="background:#d1fae5;color:#065f46">Disetujui</span></td>
-          <td class="px-2.5 py-2 text-[11px] text-[var(--muted-foreground)]">—</td>
-          <td class="px-2.5 py-2"><a href="#" class="text-[#c0392b] text-[11px] no-underline hover:underline">↗ Buka</a></td>
-          <td class="px-2.5 py-2 text-right"><button class="bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)] rounded-md text-[11px] font-medium py-0.5 px-2 mr-1">Edit</button><span class="text-[var(--muted-foreground)] cursor-pointer hover:text-[#c0392b]">✕</span></td>
-        </tr>
-        <tr data-kelas="C" class="border-b border-[var(--border)] hover:bg-[var(--background)]">
-          <td class="px-2.5 py-2 text-[var(--muted-foreground)]">5</td>
-          <td class="px-2.5 py-2"><span class="font-medium block">Podcast: Kisah Pedagang Kaki Lima di Era Digital</span><span class="rubrik-tag bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)]">Kegiatan Komunitas</span></td>
-          <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">Audio / Podcast</td>
-          <td class="px-2.5 py-2 font-medium">Rizky Maulana</td>
-          <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">18 Okt</td>
-          <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">19 Okt</td>
-          <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">22 Okt</td>
-          <td class="px-2.5 py-2"><span class="badge" style="background:#f0fdf4;color:#166534">Tayang</span></td>
-          <td class="px-2.5 py-2"><span class="badge" style="background:#d1fae5;color:#065f46">Disetujui</span></td>
-          <td class="px-2.5 py-2 text-[11px] text-[var(--muted-foreground)]">—</td>
-          <td class="px-2.5 py-2"><a href="#" class="text-[#c0392b] text-[11px] no-underline hover:underline">↗ Buka</a></td>
-          <td class="px-2.5 py-2 text-right"><button class="bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)] rounded-md text-[11px] font-medium py-0.5 px-2 mr-1">Edit</button><span class="text-[var(--muted-foreground)] cursor-pointer hover:text-[#c0392b]">✕</span></td>
-        </tr>
-        <tr data-kelas="C" class="hover:bg-[var(--background)]">
-          <td class="px-2.5 py-2 text-[var(--muted-foreground)]">6</td>
-          <td class="px-2.5 py-2"><span class="font-medium block">Perbaikan Jalan Raya — Progres Lambat</span><span class="rubrik-tag bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)]">Layanan Publik</span></td>
-          <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">Infografis</td>
-          <td class="px-2.5 py-2 font-medium">Fajar Hidayat</td>
-          <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">—</td>
-          <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">—</td>
-          <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">—</td>
-          <td class="px-2.5 py-2"><span class="badge" style="background:#fee2e2;color:#991b1b">Ditunda</span></td>
-          <td class="px-2.5 py-2"><span class="badge" style="background:#f3f4f6;color:#6b7280">Belum</span></td>
-          <td class="px-2.5 py-2 text-[11px] text-[var(--muted-foreground)]">Narasumber belum bisa dihubungi</td>
-          <td class="px-2.5 py-2 text-[var(--muted-foreground)]">—</td>
-          <td class="px-2.5 py-2 text-right"><button class="bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)] rounded-md text-[11px] font-medium py-0.5 px-2 mr-1">Edit</button><span class="text-[var(--muted-foreground)] cursor-pointer hover:text-[#c0392b]">✕</span></td>
-        </tr>
-      </tbody>
+      <tbody id="tbody"></tbody>
     </table>
+    <div id="empty-state" class="hidden text-center py-12 text-[var(--muted-foreground)]">
+      <div class="text-3xl mb-2">📋</div>
+      <p id="empty-msg" class="text-sm">Belum ada konten.</p>
+    </div>
   </div>
 </div>
 
-<!-- Tambah Konten modal -->
+<!-- Tambah/Edit Konten modal -->
 <div id="modal" class="hidden fixed inset-0 z-50 items-center justify-center p-4">
   <div data-close-modal class="absolute inset-0 bg-black/50"></div>
   <form id="content-form" class="relative w-full max-w-lg max-h-[90vh] overflow-y-auto bg-[var(--card)] text-[var(--foreground)] border border-[var(--border)] rounded-xl shadow-2xl p-5">
     <h2 class="text-base font-semibold mb-4">Tambah Konten</h2>
+    <input type="hidden" name="id">
 
-    <label class="block mb-3"><span class="block text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-1">Judul / Topik</span>
-      <input name="judul" required class="w-full bg-[var(--background)] border border-[var(--border)] rounded-md py-1.5 px-2 text-xs"></label>
+    <label class="block mb-3"><span class="block text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-1">Judul / Topik *</span>
+      <input name="judul" required class="w-full bg-[var(--background)] border border-[var(--border)] rounded-md py-1.5 px-2 text-xs text-[var(--foreground)]"></label>
 
     <div class="grid grid-cols-2 gap-3">
       <label class="block mb-3"><span class="block text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-1">Rubrik</span>
-        <input name="rubrik" list="rubrik-list" placeholder="Berita Warga, Opini…" class="w-full bg-[var(--background)] border border-[var(--border)] rounded-md py-1.5 px-2 text-xs"></label>
+        <input name="rubrik" list="rubrik-list" placeholder="Berita Warga, Opini…" class="w-full bg-[var(--background)] border border-[var(--border)] rounded-md py-1.5 px-2 text-xs text-[var(--foreground)]"></label>
       <label class="block mb-3"><span class="block text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-1">Format</span>
-        <select name="format" class="w-full bg-[var(--background)] border border-[var(--border)] rounded-md py-1.5 px-2 text-xs">
+        <select name="format" class="w-full bg-[var(--background)] border border-[var(--border)] rounded-md py-1.5 px-2 text-xs text-[var(--foreground)]">
           <option value="">— pilih —</option>
           <option>Teks / Artikel</option><option>Video</option><option>Foto + Caption</option>
-          <option>Audio / Podcast</option><option>Infografis</option>
+          <option>Audio / Podcast</option><option>Infografis</option><option>Live / Siaran</option>
         </select></label>
-      <label class="block mb-3"><span class="block text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-1">PIC (Penanggung Jawab)</span>
-        <input name="pic" required placeholder="Nama mahasiswa" class="w-full bg-[var(--background)] border border-[var(--border)] rounded-md py-1.5 px-2 text-xs"></label>
+      <label class="block mb-3"><span class="block text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-1">PIC (Penanggung Jawab) *</span>
+        <input name="pic" required placeholder="Nama mahasiswa" class="w-full bg-[var(--background)] border border-[var(--border)] rounded-md py-1.5 px-2 text-xs text-[var(--foreground)]"></label>
       <label class="block mb-3"><span class="block text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-1">Status</span>
-        <select name="status" class="w-full bg-[var(--background)] border border-[var(--border)] rounded-md py-1.5 px-2 text-xs">
+        <select name="status" class="w-full bg-[var(--background)] border border-[var(--border)] rounded-md py-1.5 px-2 text-xs text-[var(--foreground)]">
           <option>Pitching</option><option>Produksi</option><option>Editing</option>
           <option>Siap Tayang</option><option>Tayang</option><option>Ditunda</option>
         </select></label>
       <label class="block mb-3"><span class="block text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-1">Approval</span>
-        <select name="approval" class="w-full bg-[var(--background)] border border-[var(--border)] rounded-md py-1.5 px-2 text-xs">
+        <select name="approval" class="w-full bg-[var(--background)] border border-[var(--border)] rounded-md py-1.5 px-2 text-xs text-[var(--foreground)]">
           <option>Belum</option><option>Perlu Revisi</option><option>Disetujui</option>
         </select></label>
       <label class="block mb-3"><span class="block text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-1">Kelas</span>
-        <select name="kelas" class="w-full bg-[var(--background)] border border-[var(--border)] rounded-md py-1.5 px-2 text-xs">
+        <select name="kelas" class="w-full bg-[var(--background)] border border-[var(--border)] rounded-md py-1.5 px-2 text-xs text-[var(--foreground)]">
           <option value="">— pilih —</option><option value="A">Kelas A — Komunitas Mushalla</option><option value="B">Kelas B — Layarlembar</option><option value="C">Kelas C — Mahasiswa Rantau</option>
         </select></label>
       <label class="block mb-3"><span class="block text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-1">Deadline Produksi</span>
-        <input type="date" name="ddl_produksi" class="w-full bg-[var(--background)] border border-[var(--border)] rounded-md py-1.5 px-2 text-xs"></label>
+        <input type="date" name="ddl_produksi" class="w-full bg-[var(--background)] border border-[var(--border)] rounded-md py-1.5 px-2 text-xs text-[var(--foreground)]"></label>
       <label class="block mb-3"><span class="block text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-1">Deadline Editing</span>
-        <input type="date" name="ddl_editing" class="w-full bg-[var(--background)] border border-[var(--border)] rounded-md py-1.5 px-2 text-xs"></label>
+        <input type="date" name="ddl_editing" class="w-full bg-[var(--background)] border border-[var(--border)] rounded-md py-1.5 px-2 text-xs text-[var(--foreground)]"></label>
       <label class="block mb-3"><span class="block text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-1">Tanggal Tayang</span>
-        <input type="date" name="tanggal_tayang" class="w-full bg-[var(--background)] border border-[var(--border)] rounded-md py-1.5 px-2 text-xs"></label>
+        <input type="date" name="tanggal_tayang" class="w-full bg-[var(--background)] border border-[var(--border)] rounded-md py-1.5 px-2 text-xs text-[var(--foreground)]"></label>
     </div>
 
     <label class="block mb-3"><span class="block text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-1">Link Draft (URL)</span>
-      <input type="url" name="draft" placeholder="https://docs.google.com/…" class="w-full bg-[var(--background)] border border-[var(--border)] rounded-md py-1.5 px-2 text-xs"></label>
+      <input type="url" name="draft" placeholder="https://docs.google.com/…" class="w-full bg-[var(--background)] border border-[var(--border)] rounded-md py-1.5 px-2 text-xs text-[var(--foreground)]"></label>
 
-    <label class="block mb-4"><span class="block text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-1">Catatan / Kendala</span>
-      <textarea name="catatan" rows="3" placeholder="Revisi, kendala produksi, info tambahan…" class="w-full bg-[var(--background)] border border-[var(--border)] rounded-md py-1.5 px-2 text-xs resize-y"></textarea></label>
+    <label class="block mb-4"><span class="block text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-1">Catatan / Catatan Revisi</span>
+      <textarea name="catatan" rows="3" placeholder="Revisi, kendala produksi, info tambahan…" class="w-full bg-[var(--background)] border border-[var(--border)] rounded-md py-1.5 px-2 text-xs resize-y text-[var(--foreground)]"></textarea></label>
 
     <div class="flex justify-end gap-2 pt-1">
-      <button type="button" data-close-modal class="bg-[#1a1917] text-[#f8f7f4] rounded-md text-xs font-medium py-1.5 px-3 cursor-pointer">Batal</button>
+      <button type="button" data-close-modal class="bg-[var(--background)] text-[var(--foreground)] border border-[var(--border)] rounded-md text-xs font-medium py-1.5 px-3 cursor-pointer">Batal</button>
       <button type="submit" class="bg-[#c0392b] text-white rounded-md text-xs font-medium py-1.5 px-3 cursor-pointer">Simpan</button>
     </div>
   </form>
@@ -272,173 +176,346 @@
   </datalist>
 </div>
 
+<!-- Konfirmasi Hapus modal -->
+<div id="del-modal" class="hidden fixed inset-0 z-50 items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/50" onclick="closeDelModal()"></div>
+  <div class="relative w-full max-w-xs bg-[var(--card)] text-[var(--foreground)] border border-[var(--border)] rounded-xl shadow-2xl p-5 text-center">
+    <div class="text-3xl mb-2">🗑️</div>
+    <h3 class="font-semibold mb-1">Hapus Konten?</h3>
+    <p id="del-title" class="text-xs text-[var(--muted-foreground)] mb-4"></p>
+    <div class="flex justify-center gap-2">
+      <button onclick="closeDelModal()" class="bg-[var(--background)] text-[var(--foreground)] border border-[var(--border)] rounded-md text-xs font-medium py-1.5 px-3 cursor-pointer">Batal</button>
+      <button onclick="confirmDelete()" class="bg-[#c0392b] text-white rounded-md text-xs font-medium py-1.5 px-3 cursor-pointer">Hapus</button>
+    </div>
+  </div>
+</div>
+
 <script>
+// ═══════════════════════════════════════════
+// Constants & Styles
+// ═══════════════════════════════════════════
 const STATUS_STYLE = {
   'Pitching':['#eef2ff','#4338ca'], 'Produksi':['#fef3c7','#92400e'], 'Editing':['#dbeafe','#1e40af'],
   'Siap Tayang':['#d1fae5','#065f46'], 'Tayang':['#f0fdf4','#166534'], 'Ditunda':['#fee2e2','#991b1b']
 };
-const APPROVAL_STYLE = { 'Belum':['#f3f4f6','#6b7280'], 'Perlu Revisi':['#fef3c7','#92400e'], 'Disetujui':['#d1fae5','#065f46'] };
+const STATUS_STYLE_DARK = {
+  'Pitching':['#1e1b4b','#a5b4fc'], 'Produksi':['#292101','#fcd34d'], 'Editing':['#172554','#93c5fd'],
+  'Siap Tayang':['#052e16','#6ee7b7'], 'Tayang':['#052e16','#86efac'], 'Ditunda':['#450a0a','#fca5a5']
+};
+const APPROVAL_STYLE = {
+  'Belum':['#f3f4f6','#6b7280'],
+  'Perlu Revisi':['#fef3c7','#92400e'],
+  'Disetujui':['#d1fae5','#065f46']
+};
+const APPROVAL_STYLE_DARK = {
+  'Belum':['#262626','#a3a3a3'],
+  'Perlu Revisi':['#292101','#fcd34d'],
+  'Disetujui':['#052e16','#6ee7b7']
+};
+
+const STATUSES = ['Pitching','Produksi','Editing','Siap Tayang','Tayang','Ditunda'];
+const KELAS = { A: 'Komunitas Mushalla', B: 'Layarlembar', C: 'Mahasiswa Rantau' };
+const MONTHS = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+const FIELDS = ['judul','rubrik','format','pic','status','approval','kelas','ddl_produksi','ddl_editing','tanggal_tayang','draft','catatan'];
+
+// ═══════════════════════════════════════════
+// State
+// ═══════════════════════════════════════════
+let items = [];
+let user = null;
+let activeKelas = 'all';
+let activeStat = '';
+let deleteTargetId = null;
+
+// ═══════════════════════════════════════════
+// DOM Elements
+// ═══════════════════════════════════════════
+const tbody = document.getElementById('tbody');
 const modal = document.getElementById('modal');
 const form = document.getElementById('content-form');
-const tbody = document.querySelector('tbody');
-const MONTHS = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
-const todayISO = () => new Date().toISOString().slice(0,10);
-const fmtDate = iso => iso ? +iso.slice(8,10) + ' ' + MONTHS[+iso.slice(5,7)-1] : '—';
+const gate = document.getElementById('gate');
+const searchInput = document.getElementById('search-input');
+const filterStatus = document.getElementById('filter-status');
+const filterRubrik = document.getElementById('filter-rubrik');
 
-let editing = null; // tr yang lagi diedit; null = tambah baru
+// ═══════════════════════════════════════════
+// Helpers
+// ═══════════════════════════════════════════
+const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+const todayISO = () => new Date().toISOString().slice(0, 10);
+const fmtDate = iso => iso ? +iso.slice(8, 10) + ' ' + MONTHS[+iso.slice(5, 7) - 1] : '—';
+const esc = s => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const kelasLabel = k => k === 'all' ? 'Semua Kelas' : `Kelas ${k} — ${KELAS[k]}`;
+const isDark = () => document.documentElement.classList.contains('dark');
+const getStatusBadge = s => isDark() ? (STATUS_STYLE_DARK[s] || STATUS_STYLE[s]) : (STATUS_STYLE[s] || ['#eee','#333']);
+const getApprovalBadge = a => isDark() ? (APPROVAL_STYLE_DARK[a] || APPROVAL_STYLE[a]) : (APPROVAL_STYLE[a] || ['#f3f4f6','#6b7280']);
 
-function openModal(f) {
-  editing = f ? f._tr : null;
-  for (const k of ['judul','rubrik','format','pic','status','approval','kelas','ddl_produksi','ddl_editing','tanggal_tayang','draft','catatan'])
-    form[k].value = f && f[k] != null ? f[k] : (k === 'status' ? 'Pitching' : k === 'approval' ? 'Belum' : '');
-  if (!f && user && user.kelas !== 'all') form.kelas.value = user.kelas;
-  document.querySelector('#modal h2').textContent = editing ? 'Edit Konten' : 'Tambah Konten';
+let _tt;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(_tt); _tt = setTimeout(() => el.classList.remove('show'), 2700);
+}
+
+// ═══════════════════════════════════════════
+// Persistence
+// ═══════════════════════════════════════════
+function loadItems() {
+  try { items = JSON.parse(localStorage.getItem('rr_items') || '[]'); } catch { items = []; }
+}
+function saveItems() {
+  try { localStorage.setItem('rr_items', JSON.stringify(items)); } catch(e) { console.warn('Save failed', e); }
+}
+function loadUser() {
+  try { user = JSON.parse(localStorage.getItem('rr_user') || 'null'); } catch { user = null; }
+}
+
+// ═══════════════════════════════════════════
+// Seed Default Demo Data
+// ═══════════════════════════════════════════
+function seedIfEmpty() {
+  if (items.length > 0) return;
+  items = [
+    { id: uid(), judul:'Warga Terdampak Banjir di Kelurahan Sukamaju', rubrik:'Berita Warga', format:'Teks / Artikel', pic:'Andi Pratama', status:'Pitching', approval:'Belum', kelas:'A', ddl_produksi:'2026-10-15', ddl_editing:'', tanggal_tayang:'', draft:'', catatan:'' },
+    { id: uid(), judul:'Profil Pak Haji Ahmad — Tokoh Literasi Desa', rubrik:'Profil Tokoh', format:'Video', pic:'Siti Nurhaliza', status:'Produksi', approval:'Belum', kelas:'A', ddl_produksi:'2026-10-20', ddl_editing:'2026-10-24', tanggal_tayang:'2026-10-28', draft:'https://docs.google.com/document/d/example', catatan:'Rekaman audio perlu diulang' },
+    { id: uid(), judul:'Festival Budaya Betawi 2026', rubrik:'Budaya Lokal', format:'Foto + Caption', pic:'Budi Setiawan', status:'Editing', approval:'Perlu Revisi', kelas:'B', ddl_produksi:'2026-10-22', ddl_editing:'2026-10-25', tanggal_tayang:'2026-10-29', draft:'https://docs.google.com/document/d/example', catatan:'Caption perlu nama narasumber' },
+    { id: uid(), judul:'Opini: Pentingnya Ruang Publik untuk Anak Muda', rubrik:'Opini', format:'Teks / Artikel', pic:'Dewi Anggraini', status:'Siap Tayang', approval:'Disetujui', kelas:'B', ddl_produksi:'2026-10-25', ddl_editing:'2026-10-26', tanggal_tayang:'2026-10-30', draft:'https://docs.google.com/document/d/example', catatan:'' },
+    { id: uid(), judul:'Podcast: Kisah Pedagang Kaki Lima di Era Digital', rubrik:'Kegiatan Komunitas', format:'Audio / Podcast', pic:'Rizky Maulana', status:'Tayang', approval:'Disetujui', kelas:'C', ddl_produksi:'2026-10-18', ddl_editing:'2026-10-19', tanggal_tayang:'2026-10-22', draft:'https://open.spotify.com/example', catatan:'' },
+    { id: uid(), judul:'Perbaikan Jalan Raya — Progres Lambat', rubrik:'Layanan Publik', format:'Infografis', pic:'Fajar Hidayat', status:'Ditunda', approval:'Belum', kelas:'C', ddl_produksi:'', ddl_editing:'', tanggal_tayang:'', draft:'', catatan:'Narasumber belum bisa dihubungi' }
+  ];
+  saveItems();
+}
+
+// ═══════════════════════════════════════════
+// Filtering
+// ═══════════════════════════════════════════
+function getFilteredItems() {
+  const q = searchInput.value.toLowerCase().trim();
+  const fs = filterStatus.value;
+  const fr = filterRubrik.value;
+  return items.filter(it => {
+    if (activeKelas !== 'all' && it.kelas !== activeKelas) return false;
+    if (activeStat && it.status !== activeStat) return false;
+    if (fs && it.status !== fs) return false;
+    if (fr && it.rubrik !== fr) return false;
+    if (q && !it.judul?.toLowerCase().includes(q) && !it.pic?.toLowerCase().includes(q)) return false;
+    return true;
+  });
+}
+
+// ═══════════════════════════════════════════
+// Render Table
+// ═══════════════════════════════════════════
+function renderTable() {
+  const filtered = getFilteredItems();
+  const emptyEl = document.getElementById('empty-state');
+  const emptyMsg = document.getElementById('empty-msg');
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '';
+    emptyEl.classList.remove('hidden');
+    emptyMsg.textContent = items.length ? 'Tidak ada konten yang cocok.' : 'Belum ada konten.';
+    return;
+  }
+
+  emptyEl.classList.add('hidden');
+  const today = todayISO();
+
+  tbody.innerHTML = filtered.map((it, i) => {
+    const odProd = it.ddl_produksi && it.status !== 'Tayang' && it.ddl_produksi < today;
+    const odEdit = it.ddl_editing && it.status !== 'Tayang' && it.ddl_editing < today;
+    const st = getStatusBadge(it.status);
+    const ap = getApprovalBadge(it.approval || 'Belum');
+    return `<tr class="border-b border-[var(--border)] hover:bg-[var(--background)]">
+      <td class="px-2.5 py-2 text-[var(--muted-foreground)]">${i + 1}</td>
+      <td class="px-2.5 py-2"><span class="font-medium block">${esc(it.judul)}</span>${it.rubrik ? `<span class="rubrik-tag bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)]">${esc(it.rubrik)}</span>` : ''}</td>
+      <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">${esc(it.format || '—')}</td>
+      <td class="px-2.5 py-2 font-medium">${esc(it.pic)}</td>
+      <td class="px-2.5 py-2 text-[11px] ${odProd ? 'text-[#c0392b] font-semibold' : 'text-[var(--muted-foreground)]'}">${fmtDate(it.ddl_produksi)}${odProd ? ' ⚠' : ''}</td>
+      <td class="px-2.5 py-2 text-[11px] ${odEdit ? 'text-[#c0392b] font-semibold' : 'text-[var(--muted-foreground)]'}">${fmtDate(it.ddl_editing)}${odEdit ? ' ⚠' : ''}</td>
+      <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">${fmtDate(it.tanggal_tayang)}</td>
+      <td class="px-2.5 py-2"><span class="badge" style="background:${st[0]};color:${st[1]}">${esc(it.status || 'Pitching')}</span></td>
+      <td class="px-2.5 py-2"><span class="badge" style="background:${ap[0]};color:${ap[1]}">${esc(it.approval || 'Belum')}</span></td>
+      <td class="px-2.5 py-2 text-[11px] text-[var(--muted-foreground)] max-w-[140px] truncate" title="${esc(it.catatan)}">${esc(it.catatan || '—')}</td>
+      <td class="px-2.5 py-2">${it.draft ? `<a href="${esc(it.draft)}" target="_blank" rel="noopener" class="text-[#c0392b] text-[11px] no-underline hover:underline">↗ Buka</a>` : '<span class="text-[var(--muted-foreground)]">—</span>'}</td>
+      <td class="px-2.5 py-2 text-right whitespace-nowrap">
+        <button data-edit="${it.id}" class="bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)] rounded-md text-[11px] font-medium py-0.5 px-2 mr-1 cursor-pointer">Edit</button>
+        <span data-del="${it.id}" class="text-[var(--muted-foreground)] cursor-pointer hover:text-[#c0392b]">✕</span>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════
+// Render Stats Bar
+// ═══════════════════════════════════════════
+function renderStats() {
+  const visible = items.filter(it => activeKelas === 'all' || it.kelas === activeKelas);
+  const counts = {};
+  STATUSES.forEach(s => counts[s] = 0);
+  visible.forEach(it => { if (counts[it.status] !== undefined) counts[it.status]++; });
+
+  const bar = document.getElementById('stats-bar');
+  bar.innerHTML = ['', ...STATUSES].map(k => {
+    const n = k === '' ? visible.length : (counts[k] || 0);
+    const lbl = k === '' ? 'Semua' : k;
+    const isOn = activeStat === k;
+    return `<div data-stat="${k}" class="py-2 px-4 border-r border-[var(--border)] cursor-pointer ${isOn ? 'bg-[var(--card)] shadow-[inset_0_-2px_0_#c0392b]' : 'hover:bg-[var(--background)]'}" style="flex-shrink:0">
+      <div class="text-lg font-semibold leading-none tabular-nums">${n}</div>
+      <div class="text-[10px] text-[var(--muted-foreground)] mt-0.5 uppercase tracking-wider">${lbl}</div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════
+// Render Rubrik Filter
+// ═══════════════════════════════════════════
+function renderRubrikFilter() {
+  const cur = filterRubrik.value;
+  const rubrics = [...new Set(items.map(i => i.rubrik).filter(Boolean))].sort();
+  filterRubrik.innerHTML = '<option value="">Semua Rubrik</option>' + rubrics.map(r =>
+    `<option${r === cur ? ' selected' : ''}>${esc(r)}</option>`
+  ).join('');
+}
+
+function renderAll() {
+  renderStats();
+  renderRubrikFilter();
+  renderTable();
+}
+
+// ═══════════════════════════════════════════
+// Events: Filters & Stats
+// ═══════════════════════════════════════════
+document.getElementById('stats-bar').addEventListener('click', e => {
+  const cell = e.target.closest('[data-stat]');
+  if (!cell) return;
+  activeStat = cell.dataset.stat;
+  renderAll();
+});
+
+searchInput.addEventListener('input', renderTable);
+filterStatus.addEventListener('change', renderTable);
+filterRubrik.addEventListener('change', renderTable);
+
+// ═══════════════════════════════════════════
+// Table delegation: Edit / Delete
+// ═══════════════════════════════════════════
+tbody.addEventListener('click', e => {
+  const editBtn = e.target.closest('[data-edit]');
+  if (editBtn) {
+    const item = items.find(i => i.id === editBtn.dataset.edit);
+    if (item) openModal(item);
+    return;
+  }
+  const delBtn = e.target.closest('[data-del]');
+  if (delBtn) {
+    openDelModal(delBtn.dataset.del);
+  }
+});
+
+// ═══════════════════════════════════════════
+// Modal Tambah / Edit
+// ═══════════════════════════════════════════
+function openModal(item) {
+  form.id_value = item ? item.id : null;
+  for (const k of FIELDS) {
+    const el = form[k];
+    if (!el) continue;
+    el.value = item && item[k] != null ? item[k] : (k === 'status' ? 'Pitching' : k === 'approval' ? 'Belum' : '');
+  }
+  if (!item && user && user.kelas !== 'all') {
+    form.kelas.value = user.kelas;
+  }
+  form.kelas.disabled = user && user.kelas !== 'all';
+
+  document.querySelector('#modal h2').textContent = item ? 'Edit Konten' : 'Tambah Konten';
   modal.classList.remove('hidden'); modal.classList.add('flex');
   form.judul.focus();
 }
-const closeModal = () => { modal.classList.add('hidden'); modal.classList.remove('flex'); editing = null; };
+function closeModal() { modal.classList.add('hidden'); modal.classList.remove('flex'); form.id_value = null; }
+
 document.querySelector('[data-open-modal]').addEventListener('click', () => openModal(null));
 modal.querySelectorAll('[data-close-modal]').forEach(el => el.addEventListener('click', closeModal));
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
-
-// Baris statis mockup cuma ada di DOM — panen datanya ke dataset supaya Edit bisa prefill.
-// ponytail: tahun tanggal ditebak dari tahun sekarang; upgrade path = render dari array data.
-function harvest(tr) {
-  const td = tr.cells, a = td[10].querySelector('a');
-  const iso = s => { const m = s.match(/(\d+)\s+(\S+)/); return m ? `${new Date().getFullYear()}-${String(MONTHS.indexOf(m[2])+1).padStart(2,'0')}-${m[1].padStart(2,'0')}` : ''; };
-  tr.dataset.f = JSON.stringify({
-    judul: td[1].querySelector('.block').textContent,
-    rubrik: td[1].querySelector('.rubrik-tag').textContent,
-    format: td[2].textContent.trim(), pic: td[3].textContent.trim(),
-    ddl_produksi: iso(td[4].textContent), ddl_editing: iso(td[5].textContent), tanggal_tayang: iso(td[6].textContent),
-    status: td[7].textContent.trim(), approval: td[8].textContent.trim(), catatan: td[9].textContent.trim() === '—' ? '' : td[9].textContent.trim(),
-    draft: a ? a.getAttribute('href') : '', kelas: tr.dataset.kelas || '' });
-}
-[...tbody.rows].forEach(harvest);
-
-tbody.addEventListener('click', e => {
-  const btn = e.target.closest('button');
-  if (!btn || btn.textContent.trim() !== 'Edit') return;
-  const f = JSON.parse(btn.closest('tr').dataset.f);
-  f._tr = btn.closest('tr');
-  openModal(f);
-});
-
-function fillRow(tr, f) {
-  const td = tr.cells;
-  td[1].querySelector('.block').textContent = f.judul;
-  td[1].querySelector('.rubrik-tag').textContent = f.rubrik || 'Tanpa Rubrik';
-  td[2].textContent = f.format || '—';
-  td[3].textContent = f.pic;
-  const ddl = (i, iso) => {
-    const late = iso && iso < todayISO();
-    td[i].textContent = fmtDate(iso) + (late ? ' ⚠' : '');
-    td[i].className = 'px-2.5 py-2 text-[11px] ' + (late ? 'text-[#c0392b] font-semibold' : 'text-[var(--muted-foreground)]');
-  };
-  ddl(4, f.ddl_produksi); ddl(5, f.ddl_editing);
-  td[6].textContent = fmtDate(f.tanggal_tayang);
-  td[6].className = 'px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]';
-  const b = td[7].querySelector('.badge');
-  b.textContent = f.status;
-  b.style.background = STATUS_STYLE[f.status][0]; b.style.color = STATUS_STYLE[f.status][1];
-  const ap = td[8].querySelector('.badge');
-  ap.textContent = f.approval || 'Belum';
-  ap.style.background = APPROVAL_STYLE[f.approval || 'Belum'][0]; ap.style.color = APPROVAL_STYLE[f.approval || 'Belum'][1];
-  td[9].textContent = f.catatan || '—';
-  td[10].innerHTML = f.draft ? '<a href="#" class="text-[#c0392b] text-[11px] no-underline hover:underline">↗ Buka</a>' : '<span class="text-[var(--muted-foreground)]">—</span>';
-  if (f.draft) td[10].firstElementChild.href = f.draft;
-  tr.dataset.kelas = f.kelas || '';
-}
 
 form.addEventListener('submit', e => {
   e.preventDefault();
-  const f = Object.fromEntries(new FormData(form));
-  if (!f.kelas && user && user.kelas !== 'all') f.kelas = user.kelas;
-  const tr = editing || tbody.insertRow();
-  if (!editing) {
-    tr.className = 'border-b border-[var(--border)] hover:bg-[var(--background)]';
-    // Values go through textContent, never innerHTML — no injection from form input.
-    tr.innerHTML = `<td class="px-2.5 py-2 text-[var(--muted-foreground)]"></td>
-      <td class="px-2.5 py-2"><span class="font-medium block"></span><span class="rubrik-tag bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)]"></span></td>
-      <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]"></td>
-      <td class="px-2.5 py-2 font-medium"></td>
-      <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]"></td>
-      <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]"></td>
-      <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]"></td>
-      <td class="px-2.5 py-2"><span class="badge"></span></td>
-      <td class="px-2.5 py-2"><span class="badge"></span></td>
-      <td class="px-2.5 py-2 text-[11px] text-[var(--muted-foreground)]"></td>
-      <td class="px-2.5 py-2 text-[var(--muted-foreground)]">—</td>
-      <td class="px-2.5 py-2 text-right"><button class="bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)] rounded-md text-[11px] font-medium py-0.5 px-2 mr-1">Edit</button><span class="text-[var(--muted-foreground)] cursor-pointer hover:text-[#c0392b]">✕</span></td>`;
-    tr.cells[0].textContent = tbody.rows.length;
+  const data = Object.fromEntries(new FormData(form));
+  if (user && user.kelas !== 'all' && !data.kelas) data.kelas = user.kelas;
+
+  if (form.id_value) {
+    const idx = items.findIndex(i => i.id === form.id_value);
+    if (idx !== -1) {
+      items[idx] = { ...items[idx], ...data };
+      toast('Konten diperbarui.');
+    }
+  } else {
+    data.id = uid();
+    items.push(data);
+    toast('Konten ditambahkan.');
   }
-  fillRow(tr, f);
-  tr.dataset.f = JSON.stringify(f);
-  tr.style.display = (activeKelas === 'all' || f.kelas === activeKelas) ? '' : 'none';
-  refreshStats();
+
+  saveItems();
+  renderAll();
   form.reset();
   closeModal();
 });
 
-// Recompute every stats cell from the table body. Label text (lowercased) maps to status; "Semua" counts all rows.
-function refreshStats() {
-  const rows = [...document.querySelector('tbody').rows].filter(r => r.style.display !== 'none');
-  document.querySelectorAll('#stats-bar > div').forEach(cell => {
-    const label = cell.lastElementChild.textContent.trim().toLowerCase();
-    const num = cell.firstElementChild;
-    num.textContent = label === 'semua' ? rows.length
-      : rows.filter(r => r.cells[7].textContent.trim().toLowerCase() === label).length;
-  });
+// ═══════════════════════════════════════════
+// Modal Hapus
+// ═══════════════════════════════════════════
+function openDelModal(id) {
+  deleteTargetId = id;
+  const item = items.find(i => i.id === id);
+  document.getElementById('del-title').textContent = item ? `"${item.judul}"` : '';
+  const dm = document.getElementById('del-modal');
+  dm.classList.remove('hidden'); dm.classList.add('flex');
+}
+function closeDelModal() {
+  deleteTargetId = null;
+  const dm = document.getElementById('del-modal');
+  dm.classList.add('hidden'); dm.classList.remove('flex');
+}
+function confirmDelete() {
+  if (deleteTargetId) {
+    items = items.filter(i => i.id !== deleteTargetId);
+    saveItems();
+    renderAll();
+    toast('Konten dihapus.');
+  }
+  closeDelModal();
 }
 
-// --- Registrasi & pembagian kelas (localStorage) ---
-const KELAS = { A: 'Komunitas Mushalla', B: 'Layarlembar', C: 'Mahasiswa Rantau' };
-const kelasLabel = k => k === 'all' ? 'Semua Kelas' : `Kelas ${k} — ${KELAS[k]}`;
-const gate = document.getElementById('gate');
-let user = JSON.parse(localStorage.getItem('rr_user') || 'null');
-let activeKelas = 'all';
-
+// ═══════════════════════════════════════════
+// Kelas Filter & Tabs
+// ═══════════════════════════════════════════
 function applyFilter(k) {
   activeKelas = k;
-  [...tbody.rows].forEach(r => r.style.display = (k === 'all' || r.dataset.kelas === k) ? '' : 'none');
+  activeStat = '';
   document.querySelectorAll('#kelas-tabs [data-tab]').forEach(t => {
-    t.className = 'py-1.5 px-3 text-xs font-medium rounded-md cursor-pointer ' +
-      (t.dataset.tab === k ? 'bg-[#1a1917] text-[#f8f7f4]' : 'hover:bg-[var(--background)]');
+    t.className = 'py-1.5 px-3 text-xs font-medium rounded-md cursor-pointer transition-colors ' +
+      (t.dataset.tab === k ? 'bg-[#1a1917] text-[#f8f7f4]' : 'text-[var(--foreground)] hover:bg-[var(--background)]');
   });
-  refreshStats();
+  renderAll();
 }
 
-function enter() {
-  gate.classList.add('hidden'); gate.classList.remove('flex');
-  document.getElementById('kelas-select').textContent = kelasLabel(user.kelas) + ' · ' + (user.nama || user.email);
+function buildTabs() {
   const tabs = document.getElementById('kelas-tabs');
-  tabs.innerHTML = ['all','A','B','C']
+  tabs.innerHTML = ['all', 'A', 'B', 'C']
     .map(k => `<div data-tab="${k}" class="py-1.5 px-3 text-xs font-medium rounded-md cursor-pointer">${k === 'all' ? 'Semua' : 'Kelas ' + k}</div>`).join('');
   tabs.onclick = e => { const t = e.target.closest('[data-tab]'); if (t) applyFilter(t.dataset.tab); };
-  form.kelas.value = user.kelas === 'all' ? '' : user.kelas;
-  form.kelas.disabled = user.kelas !== 'all';
-  form.kelas.required = user.kelas === 'all';
-  applyFilter(user.kelas);
 }
 
-document.getElementById('reg-form').addEventListener('submit', e => {
-  e.preventDefault();
-  user = { nama: e.target.nama.value.trim(), kelas: e.submitter.dataset.kelas };
-  localStorage.setItem('rr_user', JSON.stringify(user));
-  enter();
-});
-document.getElementById('logout').addEventListener('click', () => { localStorage.removeItem('rr_user'); location.reload(); });
-
-// Dropdown ⚙ Kelas: ganti tampilan kelas dari header.
+// ═══════════════════════════════════════════
+// Dropdown ⚙ Kelas Menu
+// ═══════════════════════════════════════════
 const kelasMenu = document.getElementById('kelas-menu');
 function renderMenu() {
-  kelasMenu.innerHTML = ['A','B','C','all'].map(k =>
-    `<button data-m="${k}" class="block w-full text-left px-3 py-1.5 text-xs hover:bg-[var(--background)] ${k === activeKelas ? 'font-semibold' : ''}">${k === 'all' ? 'Semua' : 'Kelas ' + k}</button>`).join('');
+  kelasMenu.innerHTML = ['A', 'B', 'C', 'all'].map(k =>
+    `<button data-m="${k}" class="block w-full text-left px-3 py-1.5 text-xs hover:bg-[var(--background)] ${k === activeKelas ? 'font-semibold' : ''}">${k === 'all' ? 'Semua' : 'Kelas ' + k + ' — ' + KELAS[k]}</button>`).join('');
 }
 document.getElementById('kelas-btn').addEventListener('click', e => {
-  e.stopPropagation();
-  renderMenu();
-  kelasMenu.classList.toggle('hidden');
+  e.stopPropagation(); renderMenu(); kelasMenu.classList.toggle('hidden');
 });
 kelasMenu.addEventListener('click', e => {
   const b = e.target.closest('[data-m]');
@@ -448,8 +525,110 @@ kelasMenu.addEventListener('click', e => {
 });
 document.addEventListener('click', () => kelasMenu.classList.add('hidden'));
 
+// ═══════════════════════════════════════════
+// Dark Mode Toggle
+// ═══════════════════════════════════════════
+function applyTheme(theme) {
+  if (theme === 'dark') document.documentElement.classList.add('dark');
+  else document.documentElement.classList.remove('dark');
+  try { localStorage.setItem('rr_theme', theme); } catch {}
+}
+function toggleTheme() {
+  const next = isDark() ? 'light' : 'dark';
+  applyTheme(next);
+  renderAll();
+  toast(next === 'dark' ? 'Tema: Gelap' : 'Tema: Terang');
+}
+document.getElementById('theme-btn').addEventListener('click', toggleTheme);
+
+(function() {
+  const saved = localStorage.getItem('rr_theme');
+  if (saved) applyTheme(saved);
+  else if (window.matchMedia('(prefers-color-scheme: dark)').matches) applyTheme('dark');
+})();
+
+// ═══════════════════════════════════════════
+// Ekspor CSV
+// ═══════════════════════════════════════════
+document.getElementById('export-btn').addEventListener('click', () => {
+  const filtered = getFilteredItems();
+  if (!filtered.length) { toast('Tidak ada data untuk diekspor.'); return; }
+
+  const headers = ['No','Judul','Rubrik','Format','PIC','Ddl Produksi','Ddl Editing','Tgl Tayang','Status','Approval','Catatan Revisi','Draft','Kelas'];
+  const csvRows = [headers.join(',')];
+  filtered.forEach((it, i) => {
+    csvRows.push([
+      i + 1,
+      `"${(it.judul || '').replace(/"/g, '""')}"`,
+      `"${(it.rubrik || '').replace(/"/g, '""')}"`,
+      `"${(it.format || '').replace(/"/g, '""')}"`,
+      `"${(it.pic || '').replace(/"/g, '""')}"`,
+      it.ddl_produksi || '',
+      it.ddl_editing || '',
+      it.tanggal_tayang || '',
+      it.status || '',
+      it.approval || '',
+      `"${(it.catatan || '').replace(/"/g, '""')}"`,
+      it.draft || '',
+      it.kelas ? 'Kelas ' + it.kelas : ''
+    ].join(','));
+  });
+
+  const blob = new Blob(['\uFEFF' + csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `ruang-redaksi-${todayISO()}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('CSV berhasil diekspor!');
+});
+
+// ═══════════════════════════════════════════
+// Registrasi Gate
+// ═══════════════════════════════════════════
+function enter() {
+  gate.classList.add('hidden'); gate.classList.remove('flex');
+  document.getElementById('kelas-select').textContent = kelasLabel(user.kelas) + ' · ' + (user.nama || '');
+  buildTabs();
+  form.kelas.disabled = user.kelas !== 'all';
+  if (user.kelas !== 'all') form.kelas.value = user.kelas;
+  applyFilter(user.kelas);
+}
+
+document.getElementById('reg-form').addEventListener('submit', e => {
+  e.preventDefault();
+  user = { nama: e.target.nama.value.trim(), kelas: e.submitter.dataset.kelas };
+  localStorage.setItem('rr_user', JSON.stringify(user));
+  enter();
+});
+document.getElementById('logout').addEventListener('click', () => {
+  localStorage.removeItem('rr_user');
+  location.reload();
+});
+
+// ═══════════════════════════════════════════
+// Escape Key Handler
+// ═══════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeModal();
+    closeDelModal();
+  }
+});
+
+// ═══════════════════════════════════════════
+// Init
+// ═══════════════════════════════════════════
+loadItems();
+seedIfEmpty();
+loadUser();
+
 if (user) enter();
-else { gate.classList.remove('hidden'); gate.classList.add('flex'); document.querySelector('#reg-form [name=nama]').focus(); }
+else {
+  gate.classList.remove('hidden'); gate.classList.add('flex');
+  document.querySelector('#reg-form [name=nama]').focus();
+}
 </script>
 
 </body>

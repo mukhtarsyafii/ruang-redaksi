@@ -55,7 +55,7 @@
     <button id="logout" title="Ganti kelas" class="bg-white/10 border border-white/[.18] rounded-md text-[#f8f7f4] text-xs font-medium py-1 px-2 cursor-pointer">↩</button>
     <button class="bg-white/10 border border-white/[.18] rounded-md text-[#f8f7f4] text-xs font-medium py-1 px-2 cursor-pointer">👤</button>
     <button class="bg-white/10 border border-white/[.18] rounded-md text-[#f8f7f4] text-xs font-medium py-1 px-2 cursor-pointer">📥 Ekspor</button>
-    <button class="bg-white/10 border border-white/[.18] rounded-md text-[#f8f7f4] text-xs font-medium py-1 px-2 cursor-pointer">⚙ Kelas</button>
+    <div class="relative"><button id="kelas-btn" class="bg-white/10 border border-white/[.18] rounded-md text-[#f8f7f4] text-xs font-medium py-1 px-2 cursor-pointer">⚙ Kelas</button><div id="kelas-menu" class="hidden absolute right-0 top-full mt-1 w-56 bg-[var(--card)] text-[var(--foreground)] border border-[var(--border)] rounded-lg shadow-xl py-1 z-50"></div></div>
     <button data-open-modal class="bg-[#c0392b] text-white rounded-md text-xs font-medium py-1 px-2 cursor-pointer">+ Tambah</button>
   </div>
 
@@ -381,6 +381,25 @@ document.getElementById('reg-form').addEventListener('submit', e => {
   enter();
 });
 document.getElementById('logout').addEventListener('click', () => { localStorage.removeItem('rr_user'); location.reload(); });
+
+// Dropdown ⚙ Kelas: ganti tampilan kelas dari header.
+const kelasMenu = document.getElementById('kelas-menu');
+function renderMenu() {
+  kelasMenu.innerHTML = ['A','B','C','all'].map(k =>
+    `<button data-m="${k}" class="block w-full text-left px-3 py-1.5 text-xs hover:bg-[var(--background)] ${k === activeKelas ? 'font-semibold' : ''}">${k === 'all' ? 'Semua' : 'Kelas ' + k}</button>`).join('');
+}
+document.getElementById('kelas-btn').addEventListener('click', e => {
+  e.stopPropagation();
+  renderMenu();
+  kelasMenu.classList.toggle('hidden');
+});
+kelasMenu.addEventListener('click', e => {
+  const b = e.target.closest('[data-m]');
+  if (!b) return;
+  applyFilter(b.dataset.m);
+  kelasMenu.classList.add('hidden');
+});
+document.addEventListener('click', () => kelasMenu.classList.add('hidden'));
 
 if (user) enter();
 else { gate.classList.remove('hidden'); gate.classList.add('flex'); document.querySelector('#reg-form [name=email]').focus(); }

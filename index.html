@@ -27,20 +27,40 @@
 </head>
 <body class="text-[var(--foreground)] antialiased p-0">
 
+<!-- Registrasi gate -->
+<div id="gate" class="hidden fixed inset-0 z-[100] bg-[var(--background)] items-center justify-center p-4">
+  <form id="reg-form" class="w-full max-w-md bg-[var(--card)] border border-[var(--border)] rounded-xl shadow-xl p-6">
+    <span class="badge bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)]">Ruang Redaksi</span>
+    <h1 class="logo-font text-2xl mt-3 mb-1">Pilih Kelas Anda</h1>
+    <p class="text-xs text-[var(--muted-foreground)] mb-4">Masukkan email mahasiswa, lalu pilih kelas tempat Anda bertugas.</p>
+    <label class="block mb-4"><span class="block text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-1">Email Mahasiswa</span>
+      <input name="email" type="email" required placeholder="nama@kampus.ac.id" class="w-full bg-[var(--background)] border border-[var(--border)] rounded-md py-2 px-2.5 text-sm"></label>
+    <div class="grid grid-cols-2 gap-3">
+      <button type="submit" data-kelas="A" class="text-left bg-[var(--background)] border border-[var(--border)] rounded-xl p-3 cursor-pointer hover:border-[#3b82f6]"><span class="block w-7 h-7 rounded-full bg-[#3b82f6]/15 text-[#3b82f6] text-center leading-7 mb-2 text-sm">🖥</span><span class="block text-xs font-semibold">KELAS A</span><span class="block text-[11px] text-[var(--muted-foreground)]">Komunitas Mushalla</span></button>
+      <button type="submit" data-kelas="B" class="text-left bg-[var(--background)] border border-[var(--border)] rounded-xl p-3 cursor-pointer hover:border-[#10b981]"><span class="block w-7 h-7 rounded-full bg-[#10b981]/15 text-[#10b981] text-center leading-7 mb-2 text-sm">🖥</span><span class="block text-xs font-semibold">KELAS B</span><span class="block text-[11px] text-[var(--muted-foreground)]">Layarlembar</span></button>
+      <button type="submit" data-kelas="C" class="text-left bg-[var(--background)] border border-[var(--border)] rounded-xl p-3 cursor-pointer hover:border-[#f59e0b]"><span class="block w-7 h-7 rounded-full bg-[#f59e0b]/15 text-[#f59e0b] text-center leading-7 mb-2 text-sm">🖥</span><span class="block text-xs font-semibold">KELAS C</span><span class="block text-[11px] text-[var(--muted-foreground)]">Mahasiswa Rantau</span></button>
+      <button type="submit" data-kelas="all" class="text-left bg-[var(--background)] border-2 border-dashed border-[var(--border)] rounded-xl p-3 cursor-pointer hover:border-[var(--muted-foreground)]"><span class="block w-7 h-7 rounded-full bg-[var(--background)] border border-[var(--border)] text-center leading-7 mb-2 text-sm">👁</span><span class="block text-xs font-semibold">Semua Kelas</span><span class="block text-[11px] text-[var(--muted-foreground)]">Tampilan dosen</span></button>
+    </div>
+    <p class="text-[10px] text-center text-[var(--muted-foreground)] mt-4">Pilihan disimpan di browser Anda.</p>
+  </form>
+</div>
+
 <!-- Header -->
 <div class="rounded-t-xl overflow-hidden">
   <div class="bg-[#1a1917] text-[#f8f7f4] px-4 py-2.5 flex items-center gap-2.5">
     <div class="logo-font text-lg tracking-tight">Ruang<em class="text-[#c0392b] italic">Redaksi</em></div>
-    <select class="bg-white/10 border border-white/[.18] rounded-md text-[#f8f7f4] text-xs font-medium py-1 px-2.5 appearance-none cursor-pointer">
-      <option>Kelas A — Radio Komunitas Warga</option>
-    </select>
+    <div id="kelas-select" class="bg-white/10 border border-white/[.18] rounded-md text-[#f8f7f4] text-xs font-medium py-1 px-2.5"></div>
     <div class="flex-1"></div>
     <span class="text-sm opacity-70 cursor-pointer">🌓</span>
+    <button id="logout" title="Ganti kelas" class="bg-white/10 border border-white/[.18] rounded-md text-[#f8f7f4] text-xs font-medium py-1 px-2 cursor-pointer">↩</button>
     <button class="bg-white/10 border border-white/[.18] rounded-md text-[#f8f7f4] text-xs font-medium py-1 px-2 cursor-pointer">👤</button>
     <button class="bg-white/10 border border-white/[.18] rounded-md text-[#f8f7f4] text-xs font-medium py-1 px-2 cursor-pointer">📥 Ekspor</button>
     <button class="bg-white/10 border border-white/[.18] rounded-md text-[#f8f7f4] text-xs font-medium py-1 px-2 cursor-pointer">⚙ Kelas</button>
     <button data-open-modal class="bg-[#c0392b] text-white rounded-md text-xs font-medium py-1 px-2 cursor-pointer">+ Tambah</button>
   </div>
+
+  <!-- Kelas Tabs -->
+  <div id="kelas-tabs" class="flex items-center gap-1 border-b border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-[var(--foreground)]"></div>
 
   <!-- Stats Bar -->
   <div id="stats-bar" class="flex border-b border-[var(--border)] bg-[var(--card)] overflow-x-auto text-[var(--foreground)]">
@@ -101,7 +121,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr class="border-b border-[var(--border)] hover:bg-[var(--background)]">
+        <tr data-kelas="A" class="border-b border-[var(--border)] hover:bg-[var(--background)]">
           <td class="px-2.5 py-2 text-[var(--muted-foreground)]">1</td>
           <td class="px-2.5 py-2"><span class="font-medium block">Warga Terdampak Banjir di Kelurahan Sukamaju</span><span class="rubrik-tag bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)]">Berita Warga</span></td>
           <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">Teks / Artikel</td>
@@ -111,7 +131,7 @@
           <td class="px-2.5 py-2 text-[var(--muted-foreground)]">—</td>
           <td class="px-2.5 py-2 text-right"><button class="bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)] rounded-md text-[11px] font-medium py-0.5 px-2 mr-1">Edit</button><span class="text-[var(--muted-foreground)] cursor-pointer hover:text-[#c0392b]">✕</span></td>
         </tr>
-        <tr class="border-b border-[var(--border)] hover:bg-[var(--background)]">
+        <tr data-kelas="A" class="border-b border-[var(--border)] hover:bg-[var(--background)]">
           <td class="px-2.5 py-2 text-[var(--muted-foreground)]">2</td>
           <td class="px-2.5 py-2"><span class="font-medium block">Profil Pak Haji Ahmad — Tokoh Literasi Desa</span><span class="rubrik-tag bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)]">Profil Tokoh</span></td>
           <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">Video</td>
@@ -121,7 +141,7 @@
           <td class="px-2.5 py-2"><a href="#" class="text-[#c0392b] text-[11px] no-underline hover:underline">↗ Buka</a></td>
           <td class="px-2.5 py-2 text-right"><button class="bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)] rounded-md text-[11px] font-medium py-0.5 px-2 mr-1">Edit</button><span class="text-[var(--muted-foreground)] cursor-pointer hover:text-[#c0392b]">✕</span></td>
         </tr>
-        <tr class="border-b border-[var(--border)] hover:bg-[var(--background)]">
+        <tr data-kelas="B" class="border-b border-[var(--border)] hover:bg-[var(--background)]">
           <td class="px-2.5 py-2 text-[var(--muted-foreground)]">3</td>
           <td class="px-2.5 py-2"><span class="font-medium block">Festival Budaya Betawi 2026</span><span class="rubrik-tag bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)]">Budaya Lokal</span></td>
           <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">Foto + Caption</td>
@@ -131,7 +151,7 @@
           <td class="px-2.5 py-2"><a href="#" class="text-[#c0392b] text-[11px] no-underline hover:underline">↗ Buka</a></td>
           <td class="px-2.5 py-2 text-right"><button class="bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)] rounded-md text-[11px] font-medium py-0.5 px-2 mr-1">Edit</button><span class="text-[var(--muted-foreground)] cursor-pointer hover:text-[#c0392b]">✕</span></td>
         </tr>
-        <tr class="border-b border-[var(--border)] hover:bg-[var(--background)]">
+        <tr data-kelas="B" class="border-b border-[var(--border)] hover:bg-[var(--background)]">
           <td class="px-2.5 py-2 text-[var(--muted-foreground)]">4</td>
           <td class="px-2.5 py-2"><span class="font-medium block">Opini: Pentingnya Ruang Publik untuk Anak Muda</span><span class="rubrik-tag bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)]">Opini</span></td>
           <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">Teks / Artikel</td>
@@ -141,7 +161,7 @@
           <td class="px-2.5 py-2"><a href="#" class="text-[#c0392b] text-[11px] no-underline hover:underline">↗ Buka</a></td>
           <td class="px-2.5 py-2 text-right"><button class="bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)] rounded-md text-[11px] font-medium py-0.5 px-2 mr-1">Edit</button><span class="text-[var(--muted-foreground)] cursor-pointer hover:text-[#c0392b]">✕</span></td>
         </tr>
-        <tr class="border-b border-[var(--border)] hover:bg-[var(--background)]">
+        <tr data-kelas="C" class="border-b border-[var(--border)] hover:bg-[var(--background)]">
           <td class="px-2.5 py-2 text-[var(--muted-foreground)]">5</td>
           <td class="px-2.5 py-2"><span class="font-medium block">Podcast: Kisah Pedagang Kaki Lima di Era Digital</span><span class="rubrik-tag bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)]">Kegiatan Komunitas</span></td>
           <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">Audio / Podcast</td>
@@ -151,7 +171,7 @@
           <td class="px-2.5 py-2"><a href="#" class="text-[#c0392b] text-[11px] no-underline hover:underline">↗ Buka</a></td>
           <td class="px-2.5 py-2 text-right"><button class="bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)] rounded-md text-[11px] font-medium py-0.5 px-2 mr-1">Edit</button><span class="text-[var(--muted-foreground)] cursor-pointer hover:text-[#c0392b]">✕</span></td>
         </tr>
-        <tr class="hover:bg-[var(--background)]">
+        <tr data-kelas="C" class="hover:bg-[var(--background)]">
           <td class="px-2.5 py-2 text-[var(--muted-foreground)]">6</td>
           <td class="px-2.5 py-2"><span class="font-medium block">Perbaikan Jalan Raya — Progres Lambat</span><span class="rubrik-tag bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)]">Layanan Publik</span></td>
           <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">Infografis</td>
@@ -193,7 +213,7 @@
         </select></label>
       <label class="block mb-3"><span class="block text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-1">Kelas</span>
         <select name="kelas" class="w-full bg-[var(--background)] border border-[var(--border)] rounded-md py-1.5 px-2 text-xs">
-          <option value="">— pilih —</option><option>Kelas A — Radio Komunitas Warga</option>
+          <option value="">— pilih —</option><option value="A">Kelas A — Komunitas Mushalla</option><option value="B">Kelas B — Layarlembar</option><option value="C">Kelas C — Mahasiswa Rantau</option>
         </select></label>
       <label class="block mb-3"><span class="block text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-1">Deadline Produksi</span>
         <input type="date" name="ddl_produksi" class="w-full bg-[var(--background)] border border-[var(--border)] rounded-md py-1.5 px-2 text-xs"></label>
@@ -238,6 +258,7 @@ function openModal(f) {
   editing = f ? f._tr : null;
   for (const k of ['judul','rubrik','format','pic','status','kelas','ddl_produksi','ddl_editing','tanggal_tayang','draft','catatan'])
     form[k].value = f && f[k] != null ? f[k] : (k === 'status' ? 'Pitching' : '');
+  if (!f && user && user.kelas !== 'all') form.kelas.value = user.kelas;
   document.querySelector('#modal h2').textContent = editing ? 'Edit Konten' : 'Tambah Konten';
   modal.classList.remove('hidden'); modal.classList.add('flex');
   form.judul.focus();
@@ -257,7 +278,7 @@ function harvest(tr) {
     rubrik: td[1].querySelector('.rubrik-tag').textContent,
     format: td[2].textContent.trim(), pic: td[3].textContent.trim(),
     ddl_produksi: m ? `${new Date().getFullYear()}-${String(MONTHS.indexOf(m[2])+1).padStart(2,'0')}-${m[1].padStart(2,'0')}` : '',
-    status: td[5].textContent.trim(), draft: a ? a.getAttribute('href') : '' });
+    status: td[5].textContent.trim(), draft: a ? a.getAttribute('href') : '', kelas: tr.dataset.kelas || '' });
 }
 [...tbody.rows].forEach(harvest);
 
@@ -283,11 +304,13 @@ function fillRow(tr, f) {
   b.style.background = STATUS_STYLE[f.status][0]; b.style.color = STATUS_STYLE[f.status][1];
   td[6].innerHTML = f.draft ? '<a href="#" class="text-[#c0392b] text-[11px] no-underline hover:underline">↗ Buka</a>' : '<span class="text-[var(--muted-foreground)]">—</span>';
   if (f.draft) td[6].firstElementChild.href = f.draft;
+  tr.dataset.kelas = f.kelas || '';
 }
 
 form.addEventListener('submit', e => {
   e.preventDefault();
   const f = Object.fromEntries(new FormData(form));
+  if (!f.kelas && user && user.kelas !== 'all') f.kelas = user.kelas;
   const tr = editing || tbody.insertRow();
   if (!editing) {
     tr.className = 'border-b border-[var(--border)] hover:bg-[var(--background)]';
@@ -304,6 +327,7 @@ form.addEventListener('submit', e => {
   }
   fillRow(tr, f);
   tr.dataset.f = JSON.stringify(f);
+  tr.style.display = (activeKelas === 'all' || f.kelas === activeKelas) ? '' : 'none';
   refreshStats();
   form.reset();
   closeModal();
@@ -311,7 +335,7 @@ form.addEventListener('submit', e => {
 
 // Recompute every stats cell from the table body. Label text (lowercased) maps to status; "Semua" counts all rows.
 function refreshStats() {
-  const rows = [...document.querySelector('tbody').rows];
+  const rows = [...document.querySelector('tbody').rows].filter(r => r.style.display !== 'none');
   document.querySelectorAll('#stats-bar > div').forEach(cell => {
     const label = cell.lastElementChild.textContent.trim().toLowerCase();
     const num = cell.firstElementChild;
@@ -319,6 +343,47 @@ function refreshStats() {
       : rows.filter(r => r.cells[5].textContent.trim().toLowerCase() === label).length;
   });
 }
+
+// --- Registrasi & pembagian kelas (localStorage) ---
+const KELAS = { A: 'Komunitas Mushalla', B: 'Layarlembar', C: 'Mahasiswa Rantau' };
+const kelasLabel = k => k === 'all' ? 'Semua Kelas' : `Kelas ${k} — ${KELAS[k]}`;
+const gate = document.getElementById('gate');
+let user = JSON.parse(localStorage.getItem('rr_user') || 'null');
+let activeKelas = 'all';
+
+function applyFilter(k) {
+  activeKelas = k;
+  [...tbody.rows].forEach(r => r.style.display = (k === 'all' || r.dataset.kelas === k) ? '' : 'none');
+  document.querySelectorAll('#kelas-tabs [data-tab]').forEach(t => {
+    t.className = 'py-1.5 px-3 text-xs font-medium rounded-md cursor-pointer ' +
+      (t.dataset.tab === k ? 'bg-[#1a1917] text-[#f8f7f4]' : 'hover:bg-[var(--background)]');
+  });
+  refreshStats();
+}
+
+function enter() {
+  gate.classList.add('hidden'); gate.classList.remove('flex');
+  document.getElementById('kelas-select').textContent = kelasLabel(user.kelas) + ' · ' + user.email;
+  const tabs = document.getElementById('kelas-tabs');
+  tabs.innerHTML = (user.kelas === 'all' ? ['all','A','B','C'] : [user.kelas])
+    .map(k => `<div data-tab="${k}" class="py-1.5 px-3 text-xs font-medium rounded-md cursor-pointer">${k === 'all' ? 'Semua' : 'Kelas ' + k}</div>`).join('');
+  tabs.onclick = e => { const t = e.target.closest('[data-tab]'); if (t) applyFilter(t.dataset.tab); };
+  form.kelas.value = user.kelas === 'all' ? '' : user.kelas;
+  form.kelas.disabled = user.kelas !== 'all';
+  form.kelas.required = user.kelas === 'all';
+  applyFilter(user.kelas);
+}
+
+document.getElementById('reg-form').addEventListener('submit', e => {
+  e.preventDefault();
+  user = { email: e.target.email.value, kelas: e.submitter.dataset.kelas };
+  localStorage.setItem('rr_user', JSON.stringify(user));
+  enter();
+});
+document.getElementById('logout').addEventListener('click', () => { localStorage.removeItem('rr_user'); location.reload(); });
+
+if (user) enter();
+else { gate.classList.remove('hidden'); gate.classList.add('flex'); document.querySelector('#reg-form [name=email]').focus(); }
 </script>
 
 </body>

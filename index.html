@@ -226,48 +226,86 @@ const STATUS_STYLE = {
   'Siap Tayang':['#d1fae5','#065f46'], 'Tayang':['#f0fdf4','#166534'], 'Ditunda':['#fee2e2','#991b1b']
 };
 const modal = document.getElementById('modal');
-const openModal = () => { modal.classList.remove('hidden'); modal.classList.add('flex'); document.querySelector('#content-form [name=judul]').focus(); };
-const closeModal = () => { modal.classList.add('hidden'); modal.classList.remove('flex'); };
-document.querySelector('[data-open-modal]').addEventListener('click', openModal);
+const form = document.getElementById('content-form');
+const tbody = document.querySelector('tbody');
+const MONTHS = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+const todayISO = () => new Date().toISOString().slice(0,10);
+const fmtDate = iso => iso ? +iso.slice(8,10) + ' ' + MONTHS[+iso.slice(5,7)-1] : '—';
+
+let editing = null; // tr yang lagi diedit; null = tambah baru
+
+function openModal(f) {
+  editing = f ? f._tr : null;
+  for (const k of ['judul','rubrik','format','pic','status','kelas','ddl_produksi','ddl_editing','tanggal_tayang','draft','catatan'])
+    form[k].value = f && f[k] != null ? f[k] : (k === 'status' ? 'Pitching' : '');
+  document.querySelector('#modal h2').textContent = editing ? 'Edit Konten' : 'Tambah Konten';
+  modal.classList.remove('hidden'); modal.classList.add('flex');
+  form.judul.focus();
+}
+const closeModal = () => { modal.classList.add('hidden'); modal.classList.remove('flex'); editing = null; };
+document.querySelector('[data-open-modal]').addEventListener('click', () => openModal(null));
 modal.querySelectorAll('[data-close-modal]').forEach(el => el.addEventListener('click', closeModal));
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-const fmtDate = iso => {
-  if (!iso) return '—';
-  const d = new Date(iso + 'T00:00:00');
-  return d.getDate() + ' ' + ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'][d.getMonth()];
-};
+// Baris statis mockup cuma ada di DOM — panen datanya ke dataset supaya Edit bisa prefill.
+// ponytail: ddl_editing/tanggal_tayang/catatan tidak terbaca dari tabel; upgrade path = render dari array data.
+function harvest(tr) {
+  const td = tr.cells, a = td[6].querySelector('a');
+  const m = td[4].textContent.match(/(\d+)\s+(\S+)/);
+  tr.dataset.f = JSON.stringify({
+    judul: td[1].querySelector('.block').textContent,
+    rubrik: td[1].querySelector('.rubrik-tag').textContent,
+    format: td[2].textContent.trim(), pic: td[3].textContent.trim(),
+    ddl_produksi: m ? `${new Date().getFullYear()}-${String(MONTHS.indexOf(m[2])+1).padStart(2,'0')}-${m[1].padStart(2,'0')}` : '',
+    status: td[5].textContent.trim(), draft: a ? a.getAttribute('href') : '' });
+}
+[...tbody.rows].forEach(harvest);
 
-document.getElementById('content-form').addEventListener('submit', e => {
-  e.preventDefault();
-  const f = Object.fromEntries(new FormData(e.target));
-  const tbody = document.querySelector('tbody');
-  const n = tbody.rows.length + 1;
-  const [bg, fg] = STATUS_STYLE[f.status] || STATUS_STYLE['Pitching'];
-  const tr = tbody.insertRow();
-  tr.className = 'border-b border-[var(--border)] hover:bg-[var(--background)]';
-  // Values go through textContent, never innerHTML — no injection from form input.
-  tr.innerHTML = `<td class="px-2.5 py-2 text-[var(--muted-foreground)]"></td>
-    <td class="px-2.5 py-2"><span class="font-medium block"></span><span class="rubrik-tag bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)]"></span></td>
-    <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]"></td>
-    <td class="px-2.5 py-2 font-medium"></td>
-    <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]"></td>
-    <td class="px-2.5 py-2"><span class="badge"></span></td>
-    <td class="px-2.5 py-2 text-[var(--muted-foreground)]">—</td>
-    <td class="px-2.5 py-2 text-right"><button class="bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)] rounded-md text-[11px] font-medium py-0.5 px-2 mr-1">Edit</button><span class="text-[var(--muted-foreground)] cursor-pointer hover:text-[#c0392b]">✕</span></td>`;
+tbody.addEventListener('click', e => {
+  const btn = e.target.closest('button');
+  if (!btn || btn.textContent.trim() !== 'Edit') return;
+  const f = JSON.parse(btn.closest('tr').dataset.f);
+  f._tr = btn.closest('tr');
+  openModal(f);
+});
+
+function fillRow(tr, f) {
   const td = tr.cells;
-  td[0].textContent = n;
   td[1].querySelector('.block').textContent = f.judul;
   td[1].querySelector('.rubrik-tag').textContent = f.rubrik || 'Tanpa Rubrik';
   td[2].textContent = f.format || '—';
   td[3].textContent = f.pic;
-  td[4].textContent = fmtDate(f.ddl_produksi);
-  const badge = td[5].querySelector('.badge');
-  badge.textContent = f.status;
-  badge.style.background = bg; badge.style.color = fg;
-  if (f.draft) td[6].innerHTML = '<a href="#" class="text-[#c0392b] text-[11px] no-underline hover:underline">↗ Buka</a>';
+  const late = f.ddl_produksi && f.ddl_produksi < todayISO();
+  td[4].textContent = fmtDate(f.ddl_produksi) + (late ? ' ⚠' : '');
+  td[4].className = 'px-2.5 py-2 text-[11px] ' + (late ? 'text-[#c0392b] font-semibold' : 'text-[var(--muted-foreground)]');
+  const b = td[5].querySelector('.badge');
+  b.textContent = f.status;
+  b.style.background = STATUS_STYLE[f.status][0]; b.style.color = STATUS_STYLE[f.status][1];
+  td[6].innerHTML = f.draft ? '<a href="#" class="text-[#c0392b] text-[11px] no-underline hover:underline">↗ Buka</a>' : '<span class="text-[var(--muted-foreground)]">—</span>';
+  if (f.draft) td[6].firstElementChild.href = f.draft;
+}
+
+form.addEventListener('submit', e => {
+  e.preventDefault();
+  const f = Object.fromEntries(new FormData(form));
+  const tr = editing || tbody.insertRow();
+  if (!editing) {
+    tr.className = 'border-b border-[var(--border)] hover:bg-[var(--background)]';
+    // Values go through textContent, never innerHTML — no injection from form input.
+    tr.innerHTML = `<td class="px-2.5 py-2 text-[var(--muted-foreground)]"></td>
+      <td class="px-2.5 py-2"><span class="font-medium block"></span><span class="rubrik-tag bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)]"></span></td>
+      <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]"></td>
+      <td class="px-2.5 py-2 font-medium"></td>
+      <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]"></td>
+      <td class="px-2.5 py-2"><span class="badge"></span></td>
+      <td class="px-2.5 py-2 text-[var(--muted-foreground)]">—</td>
+      <td class="px-2.5 py-2 text-right"><button class="bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)] rounded-md text-[11px] font-medium py-0.5 px-2 mr-1">Edit</button><span class="text-[var(--muted-foreground)] cursor-pointer hover:text-[#c0392b]">✕</span></td>`;
+    tr.cells[0].textContent = tbody.rows.length;
+  }
+  fillRow(tr, f);
+  tr.dataset.f = JSON.stringify(f);
   refreshStats();
-  e.target.reset();
+  form.reset();
   closeModal();
 });
 

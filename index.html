@@ -32,9 +32,9 @@
   <form id="reg-form" class="w-full max-w-md bg-[var(--card)] border border-[var(--border)] rounded-xl shadow-xl p-6">
     <span class="badge bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)]">Ruang Redaksi</span>
     <h1 class="logo-font text-2xl mt-3 mb-1">Pilih Kelas Anda</h1>
-    <p class="text-xs text-[var(--muted-foreground)] mb-4">Masukkan email mahasiswa, lalu pilih kelas tempat Anda bertugas.</p>
-    <label class="block mb-4"><span class="block text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-1">Email Mahasiswa</span>
-      <input name="email" type="email" required placeholder="nama@kampus.ac.id" class="w-full bg-[var(--background)] border border-[var(--border)] rounded-md py-2 px-2.5 text-sm"></label>
+    <p class="text-xs text-[var(--muted-foreground)] mb-4">Masukkan nama mahasiswa, lalu pilih kelas tempat Anda bertugas.</p>
+    <label class="block mb-4"><span class="block text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-1">Nama Mahasiswa</span>
+      <input name="nama" required placeholder="Nama kamu" class="w-full bg-[var(--background)] border border-[var(--border)] rounded-md py-2 px-2.5 text-sm"></label>
     <div class="grid grid-cols-2 gap-3">
       <button type="submit" data-kelas="A" class="text-left bg-[var(--background)] border border-[var(--border)] rounded-xl p-3 cursor-pointer hover:border-[#3b82f6]"><span class="block w-7 h-7 rounded-full bg-[#3b82f6]/15 text-[#3b82f6] text-center leading-7 mb-2 text-sm">🖥</span><span class="block text-xs font-semibold">KELAS A</span><span class="block text-[11px] text-[var(--muted-foreground)]">Komunitas Mushalla</span></button>
       <button type="submit" data-kelas="B" class="text-left bg-[var(--background)] border border-[var(--border)] rounded-xl p-3 cursor-pointer hover:border-[#10b981]"><span class="block w-7 h-7 rounded-full bg-[#10b981]/15 text-[#10b981] text-center leading-7 mb-2 text-sm">🖥</span><span class="block text-xs font-semibold">KELAS B</span><span class="block text-[11px] text-[var(--muted-foreground)]">Layarlembar</span></button>
@@ -363,7 +363,7 @@ function applyFilter(k) {
 
 function enter() {
   gate.classList.add('hidden'); gate.classList.remove('flex');
-  document.getElementById('kelas-select').textContent = kelasLabel(user.kelas) + ' · ' + user.email;
+  document.getElementById('kelas-select').textContent = kelasLabel(user.kelas) + ' · ' + (user.nama || user.email);
   const tabs = document.getElementById('kelas-tabs');
   tabs.innerHTML = ['all','A','B','C']
     .map(k => `<div data-tab="${k}" class="py-1.5 px-3 text-xs font-medium rounded-md cursor-pointer">${k === 'all' ? 'Semua' : 'Kelas ' + k}</div>`).join('');
@@ -376,7 +376,7 @@ function enter() {
 
 document.getElementById('reg-form').addEventListener('submit', e => {
   e.preventDefault();
-  user = { email: e.target.email.value, kelas: e.submitter.dataset.kelas };
+  user = { nama: e.target.nama.value.trim(), kelas: e.submitter.dataset.kelas };
   localStorage.setItem('rr_user', JSON.stringify(user));
   enter();
 });
@@ -402,7 +402,7 @@ kelasMenu.addEventListener('click', e => {
 document.addEventListener('click', () => kelasMenu.classList.add('hidden'));
 
 if (user) enter();
-else { gate.classList.remove('hidden'); gate.classList.add('flex'); document.querySelector('#reg-form [name=email]').focus(); }
+else { gate.classList.remove('hidden'); gate.classList.add('flex'); document.querySelector('#reg-form [name=nama]').focus(); }
 </script>
 
 </body>

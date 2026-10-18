@@ -365,7 +365,7 @@ function enter() {
   gate.classList.add('hidden'); gate.classList.remove('flex');
   document.getElementById('kelas-select').textContent = kelasLabel(user.kelas) + ' · ' + user.email;
   const tabs = document.getElementById('kelas-tabs');
-  tabs.innerHTML = (user.kelas === 'all' ? ['all','A','B','C'] : [user.kelas])
+  tabs.innerHTML = ['all','A','B','C']
     .map(k => `<div data-tab="${k}" class="py-1.5 px-3 text-xs font-medium rounded-md cursor-pointer">${k === 'all' ? 'Semua' : 'Kelas ' + k}</div>`).join('');
   tabs.onclick = e => { const t = e.target.closest('[data-tab]'); if (t) applyFilter(t.dataset.tab); };
   form.kelas.value = user.kelas === 'all' ? '' : user.kelas;

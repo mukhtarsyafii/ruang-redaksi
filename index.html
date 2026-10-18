@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ruang Redaksi — Kelas A, Radio Komunitas Warga</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&display=swap">
+<style>
+  /* Design tokens: stand-in for the app theme vars so the page works standalone. */
+  :root {
+    --foreground: #1a1917;
+    --muted-foreground: #7a776e;
+    --background: #f4f2ed;
+    --card: #ffffff;
+    --border: #e2dfd7;
+    --accent: #c0392b;
+  }
+  body { font-family: 'Inter', system-ui, sans-serif; background: var(--background); }
+  .logo-font { font-family: 'Instrument Serif', serif; }
+  .badge { display:inline-block;padding:2px 8px;border-radius:11px;font-size:11px;font-weight:600;white-space:nowrap; }
+  .rubrik-tag { display:inline-block;margin-top:2px;font-size:10px;padding:1px 5px;border-radius:9px; }
+  table { border-collapse: collapse; width: 100%; font-size: 12px; }
+  thead th { text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap; }
+  tbody tr { transition: background .1s; }
+</style>
+</head>
+<body class="text-[var(--foreground)] antialiased p-0">
+
+<!-- Header -->
+<div class="rounded-t-xl overflow-hidden">
+  <div class="bg-[#1a1917] text-[#f8f7f4] px-4 py-2.5 flex items-center gap-2.5">
+    <div class="logo-font text-lg tracking-tight">Ruang<em class="text-[#c0392b] italic">Redaksi</em></div>
+    <select class="bg-white/10 border border-white/[.18] rounded-md text-[#f8f7f4] text-xs font-medium py-1 px-2.5 appearance-none cursor-pointer">
+      <option>Kelas A — Radio Komunitas Warga</option>
+    </select>
+    <div class="flex-1"></div>
+    <span class="text-sm opacity-70 cursor-pointer">🌓</span>
+    <button class="bg-white/10 border border-white/[.18] rounded-md text-[#f8f7f4] text-xs font-medium py-1 px-2 cursor-pointer">👤</button>
+    <button class="bg-white/10 border border-white/[.18] rounded-md text-[#f8f7f4] text-xs font-medium py-1 px-2 cursor-pointer">📥 Ekspor</button>
+    <button class="bg-white/10 border border-white/[.18] rounded-md text-[#f8f7f4] text-xs font-medium py-1 px-2 cursor-pointer">⚙ Kelas</button>
+    <button class="bg-[#c0392b] text-white rounded-md text-xs font-medium py-1 px-2 cursor-pointer">+ Tambah</button>
+  </div>
+
+  <!-- Stats Bar -->
+  <div class="flex border-b border-[var(--border)] bg-[var(--card)] overflow-x-auto text-[var(--foreground)]">
+    <div class="py-2 px-4 border-r border-[var(--border)] cursor-pointer bg-[var(--card)] shadow-[inset_0_-2px_0_#c0392b]">
+      <div class="text-lg font-semibold leading-none tabular-nums">8</div>
+      <div class="text-[10px] text-[var(--muted-foreground)] mt-0.5 uppercase tracking-wider">Semua</div>
+    </div>
+    <div class="py-2 px-4 border-r border-[var(--border)] cursor-pointer hover:bg-[var(--background)]">
+      <div class="text-lg font-semibold leading-none tabular-nums">2</div>
+      <div class="text-[10px] text-[var(--muted-foreground)] mt-0.5 uppercase tracking-wider">Pitching</div>
+    </div>
+    <div class="py-2 px-4 border-r border-[var(--border)] cursor-pointer hover:bg-[var(--background)]">
+      <div class="text-lg font-semibold leading-none tabular-nums">2</div>
+      <div class="text-[10px] text-[var(--muted-foreground)] mt-0.5 uppercase tracking-wider">Produksi</div>
+    </div>
+    <div class="py-2 px-4 border-r border-[var(--border)] cursor-pointer hover:bg-[var(--background)]">
+      <div class="text-lg font-semibold leading-none tabular-nums">1</div>
+      <div class="text-[10px] text-[var(--muted-foreground)] mt-0.5 uppercase tracking-wider">Editing</div>
+    </div>
+    <div class="py-2 px-4 border-r border-[var(--border)] cursor-pointer hover:bg-[var(--background)]">
+      <div class="text-lg font-semibold leading-none tabular-nums">1</div>
+      <div class="text-[10px] text-[var(--muted-foreground)] mt-0.5 uppercase tracking-wider">Siap Tayang</div>
+    </div>
+    <div class="py-2 px-4 border-r border-[var(--border)] cursor-pointer hover:bg-[var(--background)]">
+      <div class="text-lg font-semibold leading-none tabular-nums">1</div>
+      <div class="text-[10px] text-[var(--muted-foreground)] mt-0.5 uppercase tracking-wider">Tayang</div>
+    </div>
+    <div class="py-2 px-4 cursor-pointer hover:bg-[var(--background)]">
+      <div class="text-lg font-semibold leading-none tabular-nums">1</div>
+      <div class="text-[10px] text-[var(--muted-foreground)] mt-0.5 uppercase tracking-wider">Ditunda</div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="bg-[var(--card)] border-b border-[var(--border)] px-4 py-1.5 flex gap-2 items-center">
+    <input type="text" placeholder="Cari judul atau PIC…" class="bg-[var(--background)] text-[var(--foreground)] border border-[var(--border)] rounded-md py-1 px-2 text-xs flex-1 max-w-[200px]">
+    <select class="bg-[var(--background)] text-[var(--foreground)] border border-[var(--border)] rounded-md py-1 px-2 text-xs">
+      <option>Semua Status</option>
+    </select>
+    <select class="bg-[var(--background)] text-[var(--foreground)] border border-[var(--border)] rounded-md py-1 px-2 text-xs">
+      <option>Semua Rubrik</option>
+    </select>
+  </div>
+
+  <!-- Table -->
+  <div class="overflow-x-auto border border-t-0 border-[var(--border)] rounded-b-xl bg-[var(--card)]">
+    <table class="text-[var(--foreground)]">
+      <thead>
+        <tr class="border-b-2 border-[var(--border)]">
+          <th class="px-2.5 py-2 text-[var(--muted-foreground)]">#</th>
+          <th class="px-2.5 py-2 text-[var(--muted-foreground)]">Judul / Topik</th>
+          <th class="px-2.5 py-2 text-[var(--muted-foreground)]">Format</th>
+          <th class="px-2.5 py-2 text-[var(--muted-foreground)]">PIC</th>
+          <th class="px-2.5 py-2 text-[var(--muted-foreground)]">Ddl Produksi</th>
+          <th class="px-2.5 py-2 text-[var(--muted-foreground)]">Status</th>
+          <th class="px-2.5 py-2 text-[var(--muted-foreground)]">Draft</th>
+          <th class="px-2.5 py-2 text-[var(--muted-foreground)] text-right">Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="border-b border-[var(--border)] hover:bg-[var(--background)]">
+          <td class="px-2.5 py-2 text-[var(--muted-foreground)]">1</td>
+          <td class="px-2.5 py-2"><span class="font-medium block">Warga Terdampak Banjir di Kelurahan Sukamaju</span><span class="rubrik-tag bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)]">Berita Warga</span></td>
+          <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">Teks / Artikel</td>
+          <td class="px-2.5 py-2 font-medium">Andi Pratama</td>
+          <td class="px-2.5 py-2 text-[#c0392b] font-semibold text-[11px]">15 Okt ⚠</td>
+          <td class="px-2.5 py-2"><span class="badge" style="background:#eef2ff;color:#4338ca">Pitching</span></td>
+          <td class="px-2.5 py-2 text-[var(--muted-foreground)]">—</td>
+          <td class="px-2.5 py-2 text-right"><button class="bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)] rounded-md text-[11px] font-medium py-0.5 px-2 mr-1">Edit</button><span class="text-[var(--muted-foreground)] cursor-pointer hover:text-[#c0392b]">✕</span></td>
+        </tr>
+        <tr class="border-b border-[var(--border)] hover:bg-[var(--background)]">
+          <td class="px-2.5 py-2 text-[var(--muted-foreground)]">2</td>
+          <td class="px-2.5 py-2"><span class="font-medium block">Profil Pak Haji Ahmad — Tokoh Literasi Desa</span><span class="rubrik-tag bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)]">Profil Tokoh</span></td>
+          <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">Video</td>
+          <td class="px-2.5 py-2 font-medium">Siti Nurhaliza</td>
+          <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">20 Okt</td>
+          <td class="px-2.5 py-2"><span class="badge" style="background:#fef3c7;color:#92400e">Produksi</span></td>
+          <td class="px-2.5 py-2"><a href="#" class="text-[#c0392b] text-[11px] no-underline hover:underline">↗ Buka</a></td>
+          <td class="px-2.5 py-2 text-right"><button class="bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)] rounded-md text-[11px] font-medium py-0.5 px-2 mr-1">Edit</button><span class="text-[var(--muted-foreground)] cursor-pointer hover:text-[#c0392b]">✕</span></td>
+        </tr>
+        <tr class="border-b border-[var(--border)] hover:bg-[var(--background)]">
+          <td class="px-2.5 py-2 text-[var(--muted-foreground)]">3</td>
+          <td class="px-2.5 py-2"><span class="font-medium block">Festival Budaya Betawi 2026</span><span class="rubrik-tag bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)]">Budaya Lokal</span></td>
+          <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">Foto + Caption</td>
+          <td class="px-2.5 py-2 font-medium">Budi Setiawan</td>
+          <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">22 Okt</td>
+          <td class="px-2.5 py-2"><span class="badge" style="background:#dbeafe;color:#1e40af">Editing</span></td>
+          <td class="px-2.5 py-2"><a href="#" class="text-[#c0392b] text-[11px] no-underline hover:underline">↗ Buka</a></td>
+          <td class="px-2.5 py-2 text-right"><button class="bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)] rounded-md text-[11px] font-medium py-0.5 px-2 mr-1">Edit</button><span class="text-[var(--muted-foreground)] cursor-pointer hover:text-[#c0392b]">✕</span></td>
+        </tr>
+        <tr class="border-b border-[var(--border)] hover:bg-[var(--background)]">
+          <td class="px-2.5 py-2 text-[var(--muted-foreground)]">4</td>
+          <td class="px-2.5 py-2"><span class="font-medium block">Opini: Pentingnya Ruang Publik untuk Anak Muda</span><span class="rubrik-tag bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)]">Opini</span></td>
+          <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">Teks / Artikel</td>
+          <td class="px-2.5 py-2 font-medium">Dewi Anggraini</td>
+          <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">25 Okt</td>
+          <td class="px-2.5 py-2"><span class="badge" style="background:#d1fae5;color:#065f46">Siap Tayang</span></td>
+          <td class="px-2.5 py-2"><a href="#" class="text-[#c0392b] text-[11px] no-underline hover:underline">↗ Buka</a></td>
+          <td class="px-2.5 py-2 text-right"><button class="bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)] rounded-md text-[11px] font-medium py-0.5 px-2 mr-1">Edit</button><span class="text-[var(--muted-foreground)] cursor-pointer hover:text-[#c0392b]">✕</span></td>
+        </tr>
+        <tr class="border-b border-[var(--border)] hover:bg-[var(--background)]">
+          <td class="px-2.5 py-2 text-[var(--muted-foreground)]">5</td>
+          <td class="px-2.5 py-2"><span class="font-medium block">Podcast: Kisah Pedagang Kaki Lima di Era Digital</span><span class="rubrik-tag bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)]">Kegiatan Komunitas</span></td>
+          <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">Audio / Podcast</td>
+          <td class="px-2.5 py-2 font-medium">Rizky Maulana</td>
+          <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">18 Okt</td>
+          <td class="px-2.5 py-2"><span class="badge" style="background:#f0fdf4;color:#166534">Tayang</span></td>
+          <td class="px-2.5 py-2"><a href="#" class="text-[#c0392b] text-[11px] no-underline hover:underline">↗ Buka</a></td>
+          <td class="px-2.5 py-2 text-right"><button class="bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)] rounded-md text-[11px] font-medium py-0.5 px-2 mr-1">Edit</button><span class="text-[var(--muted-foreground)] cursor-pointer hover:text-[#c0392b]">✕</span></td>
+        </tr>
+        <tr class="hover:bg-[var(--background)]">
+          <td class="px-2.5 py-2 text-[var(--muted-foreground)]">6</td>
+          <td class="px-2.5 py-2"><span class="font-medium block">Perbaikan Jalan Raya — Progres Lambat</span><span class="rubrik-tag bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)]">Layanan Publik</span></td>
+          <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">Infografis</td>
+          <td class="px-2.5 py-2 font-medium">Fajar Hidayat</td>
+          <td class="px-2.5 py-2 text-[var(--muted-foreground)] text-[11px]">—</td>
+          <td class="px-2.5 py-2"><span class="badge" style="background:#fee2e2;color:#991b1b">Ditunda</span></td>
+          <td class="px-2.5 py-2 text-[var(--muted-foreground)]">—</td>
+          <td class="px-2.5 py-2 text-right"><button class="bg-[var(--background)] text-[var(--muted-foreground)] border border-[var(--border)] rounded-md text-[11px] font-medium py-0.5 px-2 mr-1">Edit</button><span class="text-[var(--muted-foreground)] cursor-pointer hover:text-[#c0392b]">✕</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</body>
+</html>
